@@ -12,7 +12,7 @@ using UnityEditor;
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Editor.Huatuo
+namespace Assets.Editor.Huatuo
 {
     /// <summary>
     /// 这个类是Huatuo管理器中用到的LOGO图标

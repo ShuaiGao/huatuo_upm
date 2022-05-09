@@ -14,7 +14,7 @@ using Editor.Huatuo.ThirdPart;
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Editor.Huatuo
+namespace Assets.Editor.Huatuo
 {
     /// <summary>
     /// 这个类是Huatuo管理器，用于对Huatuo进行开关和更新等相关操作
@@ -61,6 +61,16 @@ namespace Editor.Huatuo
             win.titleContent = new GUIContent("Huatuo Manager");
             win.minSize = win.maxSize = WinSize;
             win.ShowUtility();
+        }
+        [MenuItem("HuaTuo/Install/github", false, 3)]
+        public static void InstallByGithub()
+        {
+            new Installer(true).Install();
+        }
+        [MenuItem("HuaTuo/Install/gitee", false, 3)]
+        public static void InstallByGitee()
+        {
+            new Installer(false).Install();
         }
 
         private void OnEnable()

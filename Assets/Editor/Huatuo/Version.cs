@@ -6,7 +6,7 @@
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Editor.Huatuo
+namespace Assets.Editor.Huatuo
 {
     /// <summary>
     /// 这个类提供了Huatuo和IL2CPP相关的版本信息
@@ -14,8 +14,12 @@ namespace Editor.Huatuo
     [Serializable]
     internal class HuatuoVersion
     {
-        public string ver = "";
-        public string commitid = "";
+        public string ver;
+        public string commitid;
+        public string Libil2cppUrl;
+        public string HuatuoUrl;
+        public string InstallTime;
+        public long Timestamp;
     }
 
     /// <summary>
