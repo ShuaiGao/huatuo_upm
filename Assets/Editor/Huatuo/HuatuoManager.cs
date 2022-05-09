@@ -1,19 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using UnityEditor;
 using UnityEditorInternal;
-using UnityEngine;
+using UnityEngine; 
+    
+// HuatuoManager.cs
+//
+// Author:
+//   ldr123 (ldr12@163.com)
+//
 
 namespace Huatuo.Editor
 {
-    [Serializable]
-    internal class VersionInfo
-    {
-        public string ver;
-        public string commitid;
-    }
-
+    /// <summary>
+    /// 这个类是Huatuo管理器，用于对Huatuo进行开关和更新等相关操作
+    /// </summary>
     public class HuatuoManager : EditorWindow
     {
         private static readonly Vector2 WinSize = new Vector2(620f, 650f);
@@ -34,11 +35,11 @@ namespace Huatuo.Editor
         private Rect m_rtHeader = Rect.zero;
 
 
-        private VersionInfo m_verHuatuo_il2cpp = null;
-        private VersionInfo m_verHuatuo = null;
+        private HuatuoVersion m_verHuatuo_il2cpp = null;
+        private HuatuoVersion m_verHuatuo = null;
 
-        private VersionInfo m_verHuatuoBack_il2cpp = null;
-        private VersionInfo m_verHuatuoBack = null;
+        private HuatuoVersion m_verHuatuoBack_il2cpp = null;
+        private HuatuoVersion m_verHuatuoBack = null;
 
         private bool m_bHasHuatuo = false;
         private bool m_bHasHuatoBack = false;
@@ -48,6 +49,7 @@ namespace Huatuo.Editor
 
         private GUIStyle m_styleNormalFont = null;
         private GUIStyle m_styleWarningFont = null;
+        private GUIStyle m_styleNormalBtn = null;
         private GUIStyle m_styleFooterBtn = null;
 
 
@@ -65,7 +67,12 @@ namespace Huatuo.Editor
             Init();
         }
 
-        private static VersionInfo CheckVersion(string basePath)
+        /// <summary>
+        /// 检查给定目录下是否有Huatuo的版本文件
+        /// </summary>
+        /// <param name="basePath">待检查的根目录</param>
+        /// <returns>如果存在版本文件，则返回相应的版本信息，否则返回空</returns>
+        private static HuatuoVersion CheckVersion(string basePath)
         {
             var verFile = basePath + "/version.json";
             if (!File.Exists(verFile))
@@ -79,9 +86,12 @@ namespace Huatuo.Editor
                 return null;
             }
 
-            return JsonUtility.FromJson<VersionInfo>(txt);
+            return JsonUtility.FromJson<HuatuoVersion>(txt);
         }
 
+        /// <summary>
+        /// 当版本发生变化后，重新加载版本信息
+        /// </summary>
         private void ReloadVersion()
         {
             m_bHasHuatuo = Directory.Exists(HuatuoIL2CPPPath) && Directory.Exists(HuatuoPath);
@@ -116,6 +126,9 @@ namespace Huatuo.Editor
             }
         }
 
+        /// <summary>
+        /// 初始化基础环境
+        /// </summary>
         private void Init()
         {
             if (m_bInitialized)
@@ -138,56 +151,93 @@ namespace Huatuo.Editor
             m_bInitialized = true;
         }
 
+        /// <summary>
+        /// 初始化各组件显示的样式信息
+        /// </summary>
         private void CheckStyle()
         {
             if (m_styleNormalFont != null)
             {
                 return;
             }
+
+            m_styleNormalFont = new GUIStyle(GUI.skin.label)
+            {
+                wordWrap = true,
+                richText = true,
+                fontSize = 14,
+                fontStyle = FontStyle.Normal,
+                padding = new RectOffset(4, 0, 0, 0)
+            };
+
+            m_styleWarningFont = new GUIStyle(m_styleNormalFont)
+            {
+                fontSize = 18,
+                fontStyle = FontStyle.Bold
+            };
             
-            m_styleNormalFont = new GUIStyle(GUI.skin.label);
-            m_styleNormalFont.richText = true;
-            m_styleNormalFont.fontSize = 14;
-            m_styleNormalFont.fontStyle = FontStyle.Normal;
-            m_styleNormalFont.padding = new RectOffset(4, 0, 0, 0);
-            
-            m_styleWarningFont = new GUIStyle(m_styleNormalFont);
-            m_styleWarningFont.fontSize = 18;
-            m_styleWarningFont.fontStyle = FontStyle.Bold;
-            
-            m_styleFooterBtn = new GUIStyle(GUI.skin.button);
-            m_styleFooterBtn.padding = new RectOffset(0, 0, 10, 10);
-            m_styleFooterBtn.wordWrap = true;
-            m_styleFooterBtn.richText = true;
+            m_styleNormalBtn = new GUIStyle(GUI.skin.button)
+            {
+                padding = new RectOffset(0, 0, 5, 5),
+                wordWrap = true,
+                richText = true
+            };
+
+            m_styleFooterBtn = new GUIStyle(m_styleNormalBtn)
+            {
+                padding = new RectOffset(0, 0, 10, 10)
+            };
         }
 
-        private void InstallOrUpgradeGUI()
+        /// <summary>
+        /// 启用/禁用Huatuo插件
+        /// </summary>
+        /// <param name="enable">启用还是禁用</param>
+        private void EnableOrDisableHuatuo(bool enable)
+        {
+            ReloadVersion();
+        }
+
+        /// <summary>
+        /// 对Huatuo环境进行检查
+        /// </summary>
+        private void InstallOrUpgradeGui()
         {
             if (!m_bHasIl2cpp)
             {
                 GUILayout.Label("<color=red>Scripting Backend(IL2CPP) is not installed!</color>", m_styleWarningFont);
             }
 
-            var huatuoVer = "";
+            var strMsg = "";
+            var strColor = "<color=green>";
             if (m_bHasHuatuo)
             {
-                huatuoVer = $"Huatuo:{m_verHuatuo.ver}\tIL2CPP:{m_verHuatuo_il2cpp.ver}";
+                strMsg = $"Huatuo:{m_verHuatuo.ver}\tIL2CPP:{m_verHuatuo_il2cpp.ver}";
             }
             else if (m_bHasHuatoBack)
             {
-                huatuoVer = $"Huatuo:{m_verHuatuoBack.ver}\tIL2CPP:{m_verHuatuoBack_il2cpp.ver}";
+                strColor = "<color=grey>";
+                strMsg = $"Huatuo:{m_verHuatuoBack.ver}\tIL2CPP:{m_verHuatuoBack_il2cpp.ver}";
             }
 
-            if (!string.IsNullOrEmpty(huatuoVer))
+            if (!string.IsNullOrEmpty(strMsg))
             {
-                huatuoVer = "<color=green>已安装:\t" + huatuoVer + "</color>";
+                strMsg = $"{strColor}已安装:\t{strMsg}</color>";
                 GUILayout.Space(8f);
-                GUILayout.Label(huatuoVer, m_styleNormalFont);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(strMsg, m_styleNormalFont);
+                if (GUILayout.Button(m_bHasHuatuo ? "禁用" : "启用", m_styleNormalBtn))
+                {
+                    EnableOrDisableHuatuo(!m_bHasHuatuo);
+                }
+                GUILayout.EndHorizontal();
             }
-
         }
 
-        private void FooterGUI()
+        /// <summary>
+        /// 通用按钮的展示
+        /// </summary>
+        private void FooterGui()
         {
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Website", m_styleFooterBtn))
@@ -216,15 +266,13 @@ namespace Huatuo.Editor
         {
             CheckStyle();
             
-            var tmpColor = GUI.color;
-
             GUI.DrawTexture(m_rtHeader, m_texHeaderImg, ScaleMode.StretchToFill, true);
             GUILayout.Space(m_rtHeader.height + 8f);
             GUILayout.Label($"<color=white>Unity3D:\t{UnityFullVersion}</color>", m_styleNormalFont);
 
-            InstallOrUpgradeGUI();
+            InstallOrUpgradeGui();
 
-            FooterGUI();
+            FooterGui();
         }
     }
 }
