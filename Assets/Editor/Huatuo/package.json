@@ -1,0 +1,12 @@
+{
+  "name": "com.dongua.il2cpp",
+  "version": "1.0.0",
+  "displayName": "huatuo unity package",
+  "description": "huatuo unity package",
+  "unity": "2020.3.7",
+  "documentationUrl": "https://github.com/focus-creative-games/huatuo/blob/main/docs/home.md",
+  "keywords": [
+    "huatuo",
+    "il2cpp"
+  ]
+}

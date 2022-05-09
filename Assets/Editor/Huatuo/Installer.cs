@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Editor.Huatuo
@@ -14,6 +15,7 @@ namespace Assets.Editor.Huatuo
     {
         private string baseUrl;
         private bool useGithub;
+        private bool doBackup;
         private string libil2cppPrefix;
         private string huatuoPrefix;
 
@@ -108,11 +110,12 @@ namespace Assets.Editor.Huatuo
         private bool CheckSupport()
         {
             // TODO 做gitee测试，并支持gitee
-            //if (!useGithub)
-            //{
-            //    Debug.LogError("Not Support gitee， Please use github!!!");
-            //    return false;
-            //}
+            if (!useGithub)
+            {
+                //Debug.LogError("Not Support gitee， Please use github!!!");
+                EditorUtility.DisplayDialog("错误", "当前不支持gitee, 请使用github!", "ok");
+                return false;
+            }
             // TODO unity版本判断
             var version = Application.unityVersion.Split('f')[0];
             if (!versionSet.Contains(version))
@@ -123,8 +126,12 @@ namespace Assets.Editor.Huatuo
             // TODO 检查libil2cpp, huatuo 版本，避免不必要的更新
             return true;
         }
-        public static void UnBackupLibil2cpp()
+        public void UnBackupLibil2cpp()
         {
+            if(!doBackup)
+            {
+                return;
+            }
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
             string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_bak");
             // backup libil2cpp
@@ -133,13 +140,14 @@ namespace Assets.Editor.Huatuo
                 Directory.Move(installPathBak, installPath);
             }
         }
-        public static void BackupLibil2cpp()
+        public void BackupLibil2cpp()
         {
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
             string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_bak");
             // backup libil2cpp
             if (!Directory.Exists(installPathBak))
             {
+                doBackup = true;
                 Directory.Move(installPath, installPathBak);
             }
         }
