@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
-using UnityEngine; 
-    
+using UnityEngine;
+using UnityEngine.Networking;
+using Editor.Huatuo.ThirdPart;
+
 // HuatuoManager.cs
 //
 // Author:
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Huatuo.Editor
+namespace Editor.Huatuo
 {
     /// <summary>
     /// 这个类是Huatuo管理器，用于对Huatuo进行开关和更新等相关操作
@@ -19,21 +23,11 @@ namespace Huatuo.Editor
     {
         private static readonly Vector2 WinSize = new Vector2(620f, 650f);
         private static string UnityFullVersion = "";
-        private static string UnityVersion = "";
-
-        private static readonly string EditorBasePath = EditorApplication.applicationContentsPath;
-        private static readonly string HuatuoIL2CPPPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp/");
-        private static readonly string HuatuoPath = Path.Combine(HuatuoIL2CPPPath, "huatuo/");
-        private static readonly string HuatuoIL2CPPBackPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp_huatuo/");
-        private static readonly string HuatuoBackPath = Path.Combine(HuatuoIL2CPPBackPath, "huatuo/");
-        private static readonly string LibIl2cppPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp/");
-        private static readonly string LibIl2cppBackPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp_back/");
 
         private bool m_bInitialized = false;
 
         private Texture2D m_texHeaderImg = null;
         private Rect m_rtHeader = Rect.zero;
-
 
         private HuatuoVersion m_verHuatuo_il2cpp = null;
         private HuatuoVersion m_verHuatuo = null;
@@ -47,11 +41,19 @@ namespace Huatuo.Editor
         private bool m_bHasIl2cpp = false;
         private bool m_bHasIl2cppBack = false;
 
+        private bool m_bNeedUpgrade = false;
+        private bool m_bUpgrading = false;
+
+
         private GUIStyle m_styleNormalFont = null;
         private GUIStyle m_styleWarningFont = null;
         private GUIStyle m_styleNormalBtn = null;
         private GUIStyle m_styleFooterBtn = null;
 
+        private EditorCoroutines.EditorCoroutine m_corFetchManifest = null;
+        private RemoteHuatuoVersion m_verRemote = null;
+        private bool m_bFetchingManifest = false;
+        private bool m_bVersionUnsported = false;
 
         [MenuItem("HuaTuo/Manager...", false, 3)]
         public static void ShowManager()
@@ -94,17 +96,17 @@ namespace Huatuo.Editor
         /// </summary>
         private void ReloadVersion()
         {
-            m_bHasHuatuo = Directory.Exists(HuatuoIL2CPPPath) && Directory.Exists(HuatuoPath);
-            m_bHasHuatoBack = Directory.Exists(HuatuoIL2CPPBackPath) && Directory.Exists(HuatuoBackPath);
-            m_bHasIl2cpp = Directory.Exists(LibIl2cppPath);
-            m_bHasIl2cppBack = Directory.Exists(LibIl2cppBackPath);
+            m_bHasHuatuo = Directory.Exists(Config.HuatuoIL2CPPPath) && Directory.Exists(Config.HuatuoPath);
+            m_bHasHuatoBack = Directory.Exists(Config.HuatuoIL2CPPBackPath) && Directory.Exists(Config.HuatuoBackPath);
+            m_bHasIl2cpp = Directory.Exists(Config.LibIl2cppPath);
+            m_bHasIl2cppBack = Directory.Exists(Config.LibIl2cppBackPath);
 
             m_verHuatuo = null;
             m_verHuatuo_il2cpp = null;
             if (m_bHasHuatuo)
             {
-                m_verHuatuo_il2cpp = CheckVersion(HuatuoIL2CPPPath);
-                m_verHuatuo = CheckVersion(HuatuoPath);
+                m_verHuatuo_il2cpp = CheckVersion(Config.HuatuoIL2CPPPath);
+                m_verHuatuo = CheckVersion(Config.HuatuoPath);
                 m_bHasHuatuo = m_verHuatuo != null && m_verHuatuo_il2cpp != null;
                 if (!m_bHasHuatuo)
                 {
@@ -115,8 +117,8 @@ namespace Huatuo.Editor
 
             if (m_bHasHuatoBack)
             {
-                m_verHuatuoBack_il2cpp = CheckVersion(HuatuoIL2CPPBackPath);
-                m_verHuatuoBack = CheckVersion(HuatuoBackPath);
+                m_verHuatuoBack_il2cpp = CheckVersion(Config.HuatuoIL2CPPBackPath);
+                m_verHuatuoBack = CheckVersion(Config.HuatuoBackPath);
                 m_bHasHuatoBack = m_verHuatuoBack != null && m_verHuatuoBack_il2cpp != null;
                 if (!m_bHasHuatoBack)
                 {
@@ -137,7 +139,7 @@ namespace Huatuo.Editor
             }
 
             UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
-            UnityVersion = InternalEditorUtility.GetUnityVersionDigits();
+            Config.ManifestBaseURL = Config.ManifestBaseURL + InternalEditorUtility.GetUnityVersionDigits() + ".json";
 
             if (m_texHeaderImg == null)
             {
@@ -148,7 +150,24 @@ namespace Huatuo.Editor
 
             ReloadVersion();
 
+            if (m_corFetchManifest != null)
+            {
+                this.StopCoroutine(m_corFetchManifest.routine);
+            }
+
+            m_bFetchingManifest = true;
+            m_corFetchManifest = this.StartCoroutine(GetSDKVersions(true, () =>
+            {
+                m_bFetchingManifest = false;
+                ReloadVersion();
+            }));
+
             m_bInitialized = true;
+        }
+
+        private void OnDestroy()
+        {
+            this.StopAllCoroutines();
         }
 
         /// <summary>
@@ -175,7 +194,7 @@ namespace Huatuo.Editor
                 fontSize = 18,
                 fontStyle = FontStyle.Bold
             };
-            
+
             m_styleNormalBtn = new GUIStyle(GUI.skin.button)
             {
                 padding = new RectOffset(0, 0, 5, 5),
@@ -196,6 +215,16 @@ namespace Huatuo.Editor
         private void EnableOrDisableHuatuo(bool enable)
         {
             ReloadVersion();
+        }
+
+        /// <summary>
+        /// 升级中...
+        /// </summary>
+        private void Upgrade()
+        {
+            m_bUpgrading = true;
+
+            m_bUpgrading = false;
         }
 
         /// <summary>
@@ -220,18 +249,155 @@ namespace Huatuo.Editor
                 strMsg = $"Huatuo:{m_verHuatuoBack.ver}\tIL2CPP:{m_verHuatuoBack_il2cpp.ver}";
             }
 
+
+            GUILayout.Space(8f);
+            GUILayout.BeginHorizontal();
             if (!string.IsNullOrEmpty(strMsg))
             {
                 strMsg = $"{strColor}已安装:\t{strMsg}</color>";
-                GUILayout.Space(8f);
-                GUILayout.BeginHorizontal();
                 GUILayout.Label(strMsg, m_styleNormalFont);
                 if (GUILayout.Button(m_bHasHuatuo ? "禁用" : "启用", m_styleNormalBtn))
                 {
                     EnableOrDisableHuatuo(!m_bHasHuatuo);
                 }
-                GUILayout.EndHorizontal();
             }
+
+            if (GUILayout.Button("手动更新", m_styleNormalBtn))
+            {
+                Manual();
+            }
+
+            GUILayout.EndHorizontal();
+
+            if (m_bFetchingManifest)
+            {
+                GUILayout.Label("正在获取配置文件...", m_styleNormalFont);
+            }
+
+            if (m_verRemote != null)
+            {
+                GUILayout.Label($"最新版本:\tHuatuo:{m_verRemote.ver}\tIL2CPP:{m_verRemote.il2cppver}");
+
+                if (m_bNeedUpgrade && !m_bUpgrading)
+                {
+                    if (GUILayout.Button("更新", m_styleNormalBtn))
+                    {
+                        Upgrade();
+                    }
+                }
+            }
+
+            if (m_bVersionUnsported)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"<color=red>你的Unity版本不被支持，请使用受支持的版本!</color>", m_styleWarningFont);
+                if (GUILayout.Button("查看受支持的版本", m_styleNormalBtn))
+                {
+                    Application.OpenURL(Config.SupportedVersion);
+                }
+
+                GUILayout.EndHorizontal();
+
+                return;
+            }
+        }
+
+        /// <summary>
+        /// 手动安装
+        /// </summary>
+        private void Manual()
+        {
+            var strhuatuoFile = EditorUtility.OpenFilePanel("请选择Huatuo.zip", "", "*.zip");
+            if (string.IsNullOrEmpty(strhuatuoFile) || !File.Exists(strhuatuoFile))
+            {
+                EditorUtility.DisplayDialog("错误", "请选择正确的文件!", "ok");
+                return;
+            }
+
+            var stril2CppFile = EditorUtility.OpenFilePanel("请选择Il2cpp.zip", "", "*.zip");
+            if (string.IsNullOrEmpty(stril2CppFile) || !File.Exists(stril2CppFile))
+            {
+                EditorUtility.DisplayDialog("错误", "请选择正确的文件!", "ok");
+                return;
+            }
+
+            Install(strhuatuoFile, stril2CppFile);
+        }
+
+        /// <summary>
+        /// 安装版本
+        /// </summary>
+        /// <param name="strHuatuoFile">打包后的huatuo文件</param>
+        /// <param name="strIl2cppFile">打包后的il2cpp文件</param>
+        /// <returns>迭代器</returns>
+        private void Install(string strHuatuoFile, string strIl2cppFile)
+        {
+
+        }
+
+        /// <summary>
+        /// 获取远程的版本信息
+        /// </summary>
+        /// <param name="silent">静默获取</param>
+        /// <param name="callback">获取后的回调</param>
+        /// <returns>迭代器</returns>
+        private IEnumerator GetSDKVersions(bool silent, Action callback)
+        {
+            m_bVersionUnsported = false;
+            m_bFetchingManifest = true;
+            m_verRemote = null;
+            // Wait one frame so that we don't try to show the progress bar in the middle of OnGUI().
+            yield return null;
+
+            using var www = new UnityWebRequest(Config.ManifestBaseURL)
+            {
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = 10, // seconds
+            };
+            yield return www.SendWebRequest();
+
+            do
+            {
+                if (!string.IsNullOrEmpty(www.error))
+                {
+                    Debug.LogError(www.error);
+                    if (!silent)
+                    {
+                        EditorUtility.DisplayDialog("错误", $"【1】获取远程版本信息错误。\n[{www.error}]", "ok");
+                    }
+
+                    m_bVersionUnsported = www.error.Contains("404") && www.error.Contains("Found");
+
+                    break;
+                }
+
+                var json = www.downloadHandler.text;
+                if (string.IsNullOrEmpty(json))
+                {
+                    Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
+                    if (!silent)
+                    {
+                        EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
+                    }
+
+                    break;
+                }
+
+                m_verRemote = JsonUtility.FromJson<RemoteHuatuoVersion>(json);
+                if (m_verRemote == null)
+                {
+                    Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
+                    if (!silent)
+                    {
+                        EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
+                    }
+
+                    break;
+                }
+            } while (false);
+
+            m_corFetchManifest = null;
+            callback?.Invoke();
         }
 
         /// <summary>
@@ -242,30 +408,55 @@ namespace Huatuo.Editor
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Website", m_styleFooterBtn))
             {
-                Application.OpenURL("https://github.com/focus-creative-games/huatuo");
+                Application.OpenURL(Config.WebSite);
             }
-            
+
             if (GUILayout.Button("Document", m_styleFooterBtn))
             {
-                Application.OpenURL("https://github.com/focus-creative-games/huatuo");
+                Application.OpenURL(Config.Document);
             }
-            
+
             if (GUILayout.Button("Changelog", m_styleFooterBtn))
             {
-                Application.OpenURL("https://github.com/focus-creative-games/huatuo");
+                Application.OpenURL(Config.Changelog);
             }
-            
+
             if (GUILayout.Button("Check Updates", m_styleFooterBtn))
             {
-                Application.OpenURL("https://github.com/focus-creative-games/huatuo");
+                if (m_bUpgrading)
+                {
+                    return;
+                }
+
+                if (m_corFetchManifest != null)
+                {
+                    this.StopCoroutine(m_corFetchManifest.routine);
+                    m_corFetchManifest = null;
+                }
+
+                m_corFetchManifest = this.StartCoroutine(GetSDKVersions(false, () =>
+                {
+                    m_bFetchingManifest = false;
+                    var tmpVersion = new RemoteHuatuoVersion(m_verRemote);
+                    ReloadVersion();
+
+                    if (!tmpVersion.Compare(m_verRemote))
+                    {
+                        EditorUtility.DisplayDialog("", "已经是最新版本了", "OK");
+                        return;
+                    }
+
+                    Upgrade();
+                }));
             }
+
             GUILayout.EndHorizontal();
         }
 
         private void OnGUI()
         {
             CheckStyle();
-            
+
             GUI.DrawTexture(m_rtHeader, m_texHeaderImg, ScaleMode.StretchToFill, true);
             GUILayout.Space(m_rtHeader.height + 8f);
             GUILayout.Label($"<color=white>Unity3D:\t{UnityFullVersion}</color>", m_styleNormalFont);
