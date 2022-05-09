@@ -62,16 +62,21 @@ namespace Assets.Editor.Huatuo
             win.minSize = win.maxSize = WinSize;
             win.ShowUtility();
         }
-        [MenuItem("HuaTuo/Install/github", false, 3)]
+        [MenuItem("HuaTuo/Install with github", false, 3)]
         public static void InstallByGithub()
         {
-            new Installer(true).Install();
+            var version = new HuatuoVersion();
+            version.huatuoTag = "0.0.1";
+            version.libil2cppTag = "2020.3.33-0.0.1";
+            new Installer(true, version).Install();
         }
-        [MenuItem("HuaTuo/Install/gitee", false, 3)]
-        public static void InstallByGitee()
-        {
-            new Installer(false).Install();
-        }
+        //[MenuItem("HuaTuo/Install/gitee", false, 3)]
+        //public static void InstallByGitee()
+        //{
+        //    var version = new HuatuoVersion();
+        //    version.huatuoTag = "0.0.1";
+        //    new Installer(false, version).Install();
+        //}
 
         private void OnEnable()
         {
@@ -284,7 +289,7 @@ namespace Assets.Editor.Huatuo
 
             if (m_verRemote != null)
             {
-                GUILayout.Label($"最新版本:\tHuatuo:{m_verRemote.ver}\tIL2CPP:{m_verRemote.il2cppver}");
+                GUILayout.Label($"最新版本:\tHuatuo: {m_verRemote.huatuo_recommend_version}\tIL2CPP: {m_verRemote.il2cpp_recommend_version}");
 
                 if (m_bNeedUpgrade && !m_bUpgrading)
                 {
@@ -357,6 +362,8 @@ namespace Assets.Editor.Huatuo
             // Wait one frame so that we don't try to show the progress bar in the middle of OnGUI().
             yield return null;
 
+        //      //version.json
+        //https://focus-creative-games.github.io/focus-creative-games/version.json
             using var www = new UnityWebRequest(Config.ManifestBaseURL)
             {
                 downloadHandler = new DownloadHandlerBuffer(),
@@ -424,9 +431,18 @@ namespace Assets.Editor.Huatuo
                 Application.OpenURL(Config.Document);
             }
 
-            if (GUILayout.Button("Changelog", m_styleFooterBtn))
+            //if (GUILayout.Button("Changelog", m_styleFooterBtn))
+            //{
+            //    Application.OpenURL(Config.Changelog);
+            //}
+            if (GUILayout.Button("Install", m_styleFooterBtn))
             {
-                Application.OpenURL(Config.Changelog);
+                // TODO 选择安装版本， 可以单独安装huatuo或il2cpp
+                // 使用推荐版本安装
+                var version = new HuatuoVersion();
+                version.huatuoTag = m_verRemote.huatuo_recommend_version;
+                version.libil2cppTag = m_verRemote.il2cpp_recommend_version;
+                new Installer(true, version).Install();
             }
 
             if (GUILayout.Button("Check Updates", m_styleFooterBtn))

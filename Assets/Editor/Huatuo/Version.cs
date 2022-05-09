@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 // Version.cs
 //
@@ -8,12 +9,18 @@
 
 namespace Assets.Editor.Huatuo
 {
+    [Serializable]
+    internal struct VersionConfig
+    {
+    }
     /// <summary>
     /// 这个类提供了Huatuo和IL2CPP相关的版本信息
     /// </summary>
     [Serializable]
     internal class HuatuoVersion
     {
+        public string huatuoTag;
+        public string libil2cppTag;
         public string ver;
         public string commitid;
         public string Libil2cppUrl;
@@ -28,8 +35,17 @@ namespace Assets.Editor.Huatuo
     [Serializable]
     internal class RemoteHuatuoVersion
     {
-        public string ver = "";
-        public string il2cppver = "";
+        public List<string> unity_version;
+        public List<string> huatuo_version;
+        public List<string> il2cpp_version;
+        public List<string> huatuo_min_version;
+        public List<string> il2cpp_min_version;
+        public List<string> huatuo_deprecated_version;
+        public List<string> il2cpp_deprecated_version;
+        public string huatuo_recommend_version;
+        public string il2cpp_recommend_version;
+        private string use_huatuo_version;
+        private string use_il2cpp_version;
 
         public RemoteHuatuoVersion(RemoteHuatuoVersion from)
         {
@@ -37,9 +53,6 @@ namespace Assets.Editor.Huatuo
             {
                 return;
             }
-
-            ver = from.ver;
-            il2cppver = from.il2cppver;
         }
 
         /// <summary>
@@ -52,20 +65,20 @@ namespace Assets.Editor.Huatuo
                 return false;
             }
 
-            if (ver == other.ver && il2cppver == other.il2cppver)
-            {
-                return true;
-            }
+            //if (ver == other.ver && il2cppver == other.il2cppver)
+            //{
+            //    return true;
+            //}
 
-            if (Utility.CompareVersions(ver, other.ver) < 0)
-            {
-                return false;
-            }
+            //if (Utility.CompareVersions(ver, other.ver) < 0)
+            //{
+            //    return false;
+            //}
             
-            if (Utility.CompareVersions(il2cppver, other.il2cppver) < 0)
-            {
-                return false;
-            }
+            //if (Utility.CompareVersions(il2cppver, other.il2cppver) < 0)
+            //{
+            //    return false;
+            //}
 
             return true;
         }

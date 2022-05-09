@@ -18,6 +18,8 @@ namespace Assets.Editor.Huatuo
         public static string UnityFullVersion = "";
         
         public static string ManifestBaseURL = "https://ldr123.github.io/manifest/";
+        public static string urlPrefix = "https://focus-creative-games.github.io/focus-creative-games/";
+        
         private static readonly string WebSiteBase = "https://github.com/focus-creative-games/huatuo";
         public static readonly string WebSite = WebSiteBase;
         public static readonly string Document = WebSiteBase;
@@ -34,7 +36,8 @@ namespace Assets.Editor.Huatuo
 
         public static void Init()
         {
-            ManifestBaseURL = ManifestBaseURL + InternalEditorUtility.GetUnityVersionDigits() + ".json";
+            //ManifestBaseURL = ManifestBaseURL + InternalEditorUtility.GetUnityVersionDigits() + ".json";
+            ManifestBaseURL = $"{urlPrefix}/version.json";
             
             UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
         }
