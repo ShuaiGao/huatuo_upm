@@ -45,10 +45,25 @@ namespace Editor.Huatuo
         {
             if (other == null)
             {
+                return false;
+            }
+
+            if (ver == other.ver && il2cppver == other.il2cppver)
+            {
                 return true;
             }
+
+            if (Utility.CompareVersions(ver, other.ver) < 0)
+            {
+                return false;
+            }
             
-            return ver != other.ver || il2cppver != other.il2cppver;
+            if (Utility.CompareVersions(il2cppver, other.il2cppver) < 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

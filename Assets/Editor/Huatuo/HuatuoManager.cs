@@ -22,7 +22,6 @@ namespace Editor.Huatuo
     public class HuatuoManager : EditorWindow
     {
         private static readonly Vector2 WinSize = new Vector2(620f, 650f);
-        private static string UnityFullVersion = "";
 
         private bool m_bInitialized = false;
 
@@ -138,8 +137,7 @@ namespace Editor.Huatuo
                 return;
             }
 
-            UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
-            Config.ManifestBaseURL = Config.ManifestBaseURL + InternalEditorUtility.GetUnityVersionDigits() + ".json";
+            Config.Init();
 
             if (m_texHeaderImg == null)
             {
@@ -459,7 +457,7 @@ namespace Editor.Huatuo
 
             GUI.DrawTexture(m_rtHeader, m_texHeaderImg, ScaleMode.StretchToFill, true);
             GUILayout.Space(m_rtHeader.height + 8f);
-            GUILayout.Label($"<color=white>Unity3D:\t{UnityFullVersion}</color>", m_styleNormalFont);
+            GUILayout.Label($"<color=white>Unity3D:\t{Config.UnityFullVersion}</color>", m_styleNormalFont);
 
             InstallOrUpgradeGui();
 

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using UnityEditor;
+using UnityEditorInternal;
 
 // Config.cs
 //
@@ -14,6 +15,8 @@ namespace Editor.Huatuo
     /// </summary>
     public static class Config
     {
+        public static string UnityFullVersion = "";
+        
         public static string ManifestBaseURL = "https://ldr123.github.io/manifest/";
         private static readonly string WebSiteBase = "https://github.com/focus-creative-games/huatuo";
         public static readonly string WebSite = WebSiteBase;
@@ -28,5 +31,12 @@ namespace Editor.Huatuo
         public static readonly string HuatuoBackPath = Path.Combine(HuatuoIL2CPPBackPath, "huatuo/");
         public static readonly string LibIl2cppPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp/");
         public static readonly string LibIl2cppBackPath = Path.Combine(EditorBasePath, "il2cpp/libil2cpp_back/");
+
+        public static void Init()
+        {
+            ManifestBaseURL = ManifestBaseURL + InternalEditorUtility.GetUnityVersionDigits() + ".json";
+            
+            UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
+        }
     }
 }
