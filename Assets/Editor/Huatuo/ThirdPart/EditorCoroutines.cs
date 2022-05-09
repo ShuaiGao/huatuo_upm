@@ -107,16 +107,6 @@ namespace Editor.Huatuo.ThirdPart
 			}
 		}
 
-		struct YieldWWW : ICoroutineYield
-		{
-			public WWW Www;
-
-			public bool IsDone(float deltaTime)
-			{
-				return Www.isDone;
-			}
-		}
-
 		struct YieldAsync : ICoroutineYield
 		{
 			public AsyncOperation asyncOperation;
@@ -397,10 +387,6 @@ namespace Editor.Huatuo.ThirdPart
 				{
 					customYield = current as CustomYieldInstruction
 				};
-			}
-			else if (current is WWW)
-			{
-				coroutine.currentYield = new YieldWWW {Www = (WWW) current};
 			}
 			else if (current is WaitForFixedUpdate || current is WaitForEndOfFrame)
 			{

@@ -37,7 +37,8 @@ namespace Editor.Huatuo.ThirdPart
 			return EditorCoroutines.StartCoroutine(methodName, thisRef);
 		}
 
-		public static EditorCoroutines.EditorCoroutine StartCoroutine(this EditorWindow thisRef, string methodName, object value)
+		public static EditorCoroutines.EditorCoroutine StartCoroutine(this EditorWindow thisRef, string methodName,
+			object value)
 		{
 			return EditorCoroutines.StartCoroutine(methodName, value, thisRef);
 		}
