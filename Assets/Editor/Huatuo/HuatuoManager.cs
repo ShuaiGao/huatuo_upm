@@ -485,6 +485,19 @@ namespace Assets.Editor.Huatuo
                 {
                     EnableOrDisable(!m_bHasHuatuo);
                 }
+
+                if (GUILayout.Button("卸载", m_styleNormalBtn))
+                {
+                    if (m_bHasHuatuo)
+                    {
+                        EnableOrDisable(true);
+                    }
+
+                    Installer.Uninstall(ret =>
+                    {
+                        EditorUtility.DisplayDialog("提示", $"卸载完毕。{(string.IsNullOrEmpty(ret) ? " " : ret)}", "ok");
+                    });
+                }
             }
             else
             {
