@@ -268,8 +268,18 @@ namespace Huatuo.Editor
         /// </summary>
         private void Upgrade()
         {
-            m_corUpgrade = this.StartCoroutine(Upgrading());
+            //m_corUpgrade = this.StartCoroutine(install());
+            install();
         }
+        private void install()
+        {
+            var version = new InstallVersion();
+            version.huatuoTag = m_remoteConfig.huatuo_recommend_version;
+            version.il2cppTag = m_remoteConfig.GetIl2cppRecommendVersion();
+            new Installer(true, version).Install();
+            
+        }
+
 
         private IEnumerator Upgrading()
         {
@@ -298,15 +308,15 @@ namespace Huatuo.Editor
                 var needDownload =
                     new Dictionary<string, (string url, string tmpfile, string hash, string unzipPath, string verstr)
                     >();
-                //if (!m_remoteVerHuatuoIl2Cpp.Compare(m_verHuatuo_il2cpp))
+                //if (!m_remoteConfig.Compare(m_verHuatuo_il2cpp))
                 //{
+                //    var il2cpp_version = m_remoteConfig.GetIl2cppRecommendVersion();
                 //    needDownload.Add(Config.HuatuoIL2CPPBackPath,
-                //        ($"{Config.IL2CPPManifestUrl}/{m_remoteVerHuatuoIl2Cpp.ver}.zip",
-                //            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}.zip", m_remoteVerHuatuoIl2Cpp.hash,
-                //            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}_dir",
+                //        ($"{Config.IL2CPPManifestUrl}/{il2cpp_version}.zip",
+                //            $"{Config.DownloadCache}/{il2cpp_version}.zip", m_remoteVerHuatuoIl2Cpp.hash,
+                //            $"{Config.DownloadCache}/{il2cpp_version}_dir",
                 //            JsonUtility.ToJson(m_remoteVerHuatuoIl2Cpp)));
                 //}
-
                 //if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
                 //{
                 //    needDownload.Add(Config.HuatuoBackPath,
@@ -522,22 +532,22 @@ namespace Huatuo.Editor
                 GUILayout.Label("正在获取配置文件...", m_styleNormalFont);
             }
 
-            //if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null)
-            //{
-            //    GUILayout.BeginHorizontal();
-            //    GUILayout.Label($"新版本:\tHuatuo:{m_remoteVerHuatuo.ver}\tIL2CPP:{m_remoteVerHuatuoIl2Cpp.ver}",
-            //        m_styleNormalFont);
+            if (m_remoteConfig != null)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"推荐版本:\tHuatuo:{m_remoteConfig.huatuo_recommend_version}\tIL2CPP:{m_remoteConfig.GetIl2cppRecommendVersion()}",
+                    m_styleNormalFont);
 
-            //    if (m_bNeedUpgrade && m_corUpgrade == null)
-            //    {
-            //        if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn))
-            //        {
-            //            Upgrade();
-            //        }
-            //    }
+                if (m_bNeedUpgrade && m_corUpgrade == null)
+                {
+                    if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn))
+                    {
+                        Upgrade();
+                    }
+                }
 
-            //    GUILayout.EndHorizontal();
-            //}
+                GUILayout.EndHorizontal();
+            }
         }
 
         /// <summary>

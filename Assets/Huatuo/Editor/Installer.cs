@@ -93,7 +93,6 @@ namespace Huatuo.Editor
         private string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
 
         private List<string> downloadList = new List<string>();
-        private static string CacheDir = ".huatuo_cache";
 
         public Installer(bool github, InstallVersion installVersion)
         {
@@ -104,8 +103,6 @@ namespace Huatuo.Editor
 
             libil2cppTagPrefix = github ? libil2cppTagPrefixGithub : "";
             huatuoTagPrefix = github ? huatuoTagPrefixGithub : "";
-            // create cache dir
-            Directory.CreateDirectory(CacheBasePath);
         }
         public static string PathIl2cpp
         {
@@ -113,13 +110,6 @@ namespace Huatuo.Editor
             {
                 string str7 = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
                 return Path.Combine(str7, "Data", "il2cpp");
-            }
-        }
-        public static string CacheBasePath
-        {
-            get
-            {
-                return Path.Combine(Path.GetFullPath("."), CacheDir);
             }
         }
         public static string HuatuoVersionPath
@@ -251,7 +241,7 @@ namespace Huatuo.Editor
         public void InstallHuatuo()
         {
             var zipFileName = $"huatuo-{version.huatuoTag}";
-            var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
+            var zipPath = Path.Combine(PackageManager.Instance.CacheBasePath, $"{zipFileName}.zip");
             if (!File.Exists(zipPath))
             {
                 var downloadUrl = GetDownUrlWithTagHuatuo();
@@ -271,7 +261,7 @@ namespace Huatuo.Editor
         public void InstallIl2cpp()
         {
             var zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
-            var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
+            var zipPath = Path.Combine(PackageManager.Instance.CacheBasePath, $"{zipFileName}.zip");
             if (!File.Exists(zipPath))
             {
                 var downloadUrl = GetDownUrlWithTagLibil2cpp();
