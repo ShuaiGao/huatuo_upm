@@ -24,9 +24,8 @@ namespace Huatuo.Editor
         private static readonly Vector2 WinSize = new Vector2(620f, 400);
 
         private bool m_bInitialized = false;
-
-        private Texture2D m_texHeaderImg = null;
-        private Rect m_rtHeader = Rect.zero;
+        
+        private Logo m_logo = null;
 
         private HuatuoRemoteConfig m_verHuatuo_il2cpp = null;
         private HuatuoRemoteConfig m_verHuatuo = null;
@@ -173,13 +172,9 @@ namespace Huatuo.Editor
             }
 
             Config.Init();
-
-            if (m_texHeaderImg == null)
-            {
-                m_texHeaderImg = Logo.LogoImage;
-                var tmpHeight = WinSize.x / m_texHeaderImg.width * m_texHeaderImg.height;
-                m_rtHeader = m_texHeaderImg ? new Rect(0, 0, WinSize.x, tmpHeight) : Rect.zero;
-            }
+            
+            m_logo = new Logo();
+            m_logo.Init(WinSize);
 
             ReloadVersion();
 
@@ -725,9 +720,14 @@ namespace Huatuo.Editor
         private void OnGUI()
         {
             CheckStyle();
+            
+            if (m_logo != null)
+            {
+                m_logo.OnGUI();
+                
+                GUILayout.Space(m_logo.ImgHeight + 16f);
+            }
 
-            GUI.DrawTexture(m_rtHeader, m_texHeaderImg, ScaleMode.StretchToFill, true);
-            GUILayout.Space(m_rtHeader.height + 16f);
             GUILayout.Label($"<color=white>Unity3D:\t{Config.UnityFullVersion}</color>", m_styleNormalFont);
 
             EditorGUI.BeginDisabledGroup(busying);

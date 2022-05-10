@@ -17,7 +17,7 @@ namespace Huatuo.Editor
     /// <summary>
     /// 这个类是Huatuo管理器中用到的LOGO图标
     /// </summary>
-    public static class Logo
+    public class Logo
     {
         private static readonly string _logoBase64 =
             "iVBORw0KGgoAAAANSUhEUgAAAmwAAAC0CAYAAAApZ3BOAAAACXBIWXMAAAsTAAALEwEAmpwYAAA6xWlUWHRYTUw6Y29tLmFkb2JlLnh" +
@@ -740,26 +740,6 @@ namespace Huatuo.Editor
             "YRwdlRgGT/S8zOE9DJ2aUWA7TBF0nmUE0S5x+qZ7Gkq2r6HlCCk4O6tG+/U2ZRIxZJ8gQOQVOkrtM3RYRwr+A4XYOxoNWKBPHcdR3t6" +
             "LSYQ6qMk3QauXZeGXBpw6DztRO+QMAAP//AwBh8avFSHhM3wAAAABJRU5ErkJggg==";
 
-        private static Texture2D _logoImage = null;
-        /// <summary>
-        /// 获取Logo图片的句柄
-        /// </summary>
-        /// <returns> 返回Logo图片的句柄</returns>
-        public static Texture2D LogoImage
-        {
-            get
-            {
-                if (_logoImage != null)
-                {
-                    return _logoImage;
-                }
-
-                _logoImage = new Texture2D(1, 1);
-                _logoImage.LoadImage(Convert.FromBase64String(_logoBase64));
-                return _logoImage;
-            }
-        }
-
         /// <summary>
         /// 对图片的字符串进行格式化处理，以便于在IDE中更容易展示
         /// </summary>
@@ -780,6 +760,36 @@ namespace Huatuo.Editor
             }
 
             File.WriteAllText("d:\\txt.txt", sb.ToString());
+        }
+
+        private Texture2D _logoImage = null;
+        private Rect _rtImage = Rect.zero;
+        private Material _currentMaterial = null;
+
+        public int ImgHeight = 0;
+
+        public void Init(Vector2 winSize)
+        {
+            _logoImage = new Texture2D(1, 1);
+            _logoImage.LoadImage(Convert.FromBase64String(_logoBase64));
+            ImgHeight = (int) (winSize.x / _logoImage.width * _logoImage.height);
+            _rtImage = new Rect(0, 0, winSize.x, ImgHeight);
+
+            var files = AssetDatabase.FindAssets("t:shader");
+            foreach (var file in files)
+            {
+                var fileName = AssetDatabase.GUIDToAssetPath(file);
+                if (fileName.Contains("HuatuoLogoEffect"))
+                {
+                    _currentMaterial = new Material(AssetDatabase.LoadAssetAtPath<Shader>(fileName));
+                    break;
+                }
+            }
+        }
+
+        public void OnGUI()
+        {
+            Graphics.DrawTexture(_rtImage, _logoImage, _currentMaterial);
         }
     }
 }
