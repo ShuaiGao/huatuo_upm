@@ -1,12 +1,16 @@
 {
-  "name": "com.dongua.il2cpp",
-  "version": "1.0.0",
+  "name": "com.focus-creative-games.huatuo",
+  "version": "0.0.1",
   "displayName": "huatuo unity package",
-  "description": "huatuo unity package",
+  "description": "This package contains a collection of tools, used to huatuo.",
   "unity": "2020.3.7",
-  "documentationUrl": "https://github.com/focus-creative-games/huatuo/blob/main/docs/home.md",
+  "documentationUrl": "https://github.com/focus-creative-games/huatuo_upm",
   "keywords": [
     "huatuo",
     "il2cpp"
   ]
+  "author": {
+    "name": "focus-creative-games",
+    "url": "https://github.com/focus-creative-games"
+  }
 }
