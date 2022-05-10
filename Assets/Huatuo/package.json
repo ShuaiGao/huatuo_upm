@@ -1,6 +1,6 @@
 {
   "name": "com.focus-creative-games.huatuo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "displayName": "huatuo unity package",
   "description": "This package contains a collection of tools, used to huatuo.",
   "unity": "2020.3.7",
