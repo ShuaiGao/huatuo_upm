@@ -306,9 +306,14 @@ namespace Assets.Editor.Huatuo
                             $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}.zip", m_remoteVerHuatuoIl2Cpp.hash,
                             $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}_dir",
                             JsonUtility.ToJson(m_remoteVerHuatuoIl2Cpp)));
+                    
+                    needDownload.Add(Config.HuatuoBackPath,
+                        ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
+                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}.zip", m_remoteVerHuatuo.hash,
+                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}_dir",
+                            JsonUtility.ToJson(m_remoteVerHuatuo)));
                 }
-
-                if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
+                else if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
                 {
                     needDownload.Add(Config.HuatuoBackPath,
                         ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
