@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net;
+using System.Text;
 using Editor.Huatuo.ThirdPart;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
-namespace Assets.Editor.Huatuo
+namespace Huatuo.Editor
 {
-    internal static class Installer
+    internal class Installer
     {
         public static void Enable(Action<string> callback)
         {
@@ -17,7 +23,7 @@ namespace Assets.Editor.Huatuo
                 callback?.Invoke(mv1);
                 return;
             }
-            
+
             mv1 = Utility.Mv(Config.HuatuoIL2CPPBackPath, Config.HuatuoIL2CPPPath);
             if (!string.IsNullOrEmpty(mv1))
             {
@@ -25,7 +31,7 @@ namespace Assets.Editor.Huatuo
                 callback?.Invoke(mv1);
                 return;
             }
-            
+
             callback?.Invoke(null);
         }
 
@@ -38,7 +44,7 @@ namespace Assets.Editor.Huatuo
                 callback?.Invoke(mv1);
                 return;
             }
-            
+
             mv1 = Utility.Mv(Config.LibIl2cppBackPath, Config.LibIl2cppPath);
             if (!string.IsNullOrEmpty(mv1))
             {
@@ -46,7 +52,7 @@ namespace Assets.Editor.Huatuo
                 callback?.Invoke(mv1);
                 return;
             }
-            
+
             callback?.Invoke(null);
         }
 
@@ -69,10 +75,7 @@ namespace Assets.Editor.Huatuo
             });
         }
 
-        /*
-=======
-        private HuatuoVersion version;
-        private string baseUrl;
+        private InstallVersion version;
         private bool useGithub;
         private bool doBackup;
         private string libil2cppPrefix;
@@ -81,7 +84,6 @@ namespace Assets.Editor.Huatuo
         private string libil2cppTagPrefix;
         private string huatuoTagPrefix;
 
-        private HashSet<string> versionSet = new HashSet<string>() { "2020.3.33", "2021.3.1", "2020.3.7", "2020.3.9" };
         private string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
         private string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
         private string huatuoPrefixGitee = "https://gitee.com/focus-creative-games/huatuo/repository/archive";
@@ -93,7 +95,7 @@ namespace Assets.Editor.Huatuo
         private List<string> downloadList = new List<string>();
         private static string CacheDir = ".huatuo_cache";
 
-        public Installer(bool github, HuatuoVersion installVersion)
+        public Installer(bool github, InstallVersion installVersion)
         {
             this.version = installVersion;
             useGithub = github;
@@ -137,7 +139,7 @@ namespace Assets.Editor.Huatuo
         }
         public string GetDownUrlWithTagLibil2cpp()
         {
-            return @$"{libil2cppTagPrefix}/{version.libil2cppTag}.zip";
+            return @$"{libil2cppTagPrefix}/{version.il2cppTag}.zip";
         }
         public string GetDownUrlWithTagHuatuo()
         {
@@ -149,16 +151,7 @@ namespace Assets.Editor.Huatuo
         }
         public void Install()
         {
-<<<<<<< HEAD
-            var zipPath = Path.Combine(Application.temporaryCachePath, "libil2cpp_huatuo.zip");
-            var downloadUrl = GetDownUrlLibil2cpp();
-            Debug.Log($"Download libil2cpp_huatuo url: {downloadUrl}");
-            Debug.Log($"Download libil2cpp_huatuo.zip path {zipPath}");
-            DownloadFile(downloadUrl, zipPath);
-            return;
-=======
             // 安装过程，不需要对比版本，有时候需要覆盖安装的
->>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
             if (!CheckSupport())
             {
                 return;
@@ -202,18 +195,14 @@ namespace Assets.Editor.Huatuo
                 return false;
             }
             // TODO unity版本判断
-            var version = Application.unityVersion.Split('f')[0];
-            if (!versionSet.Contains(version))
-            {
-                Debug.LogError($"Not Support unity version{Application.unityVersion}");
-                return false;
-            }
+            //if (!versionSet.Contains(InternalEditorUtility.GetUnityVersionDigits()))
+            //{
+            //    Debug.LogError($"Not Support unity version{Application.unityVersion}");
+            //    return false;
+            //}
             // TODO 检查libil2cpp, huatuo 版本，避免不必要的更新
             return true;
         }
-<<<<<<< HEAD
-  
-=======
         public void UnBackupLibil2cpp()
         {
             if (!doBackup)
@@ -239,7 +228,6 @@ namespace Assets.Editor.Huatuo
                 Directory.Move(installPath, installPathBak);
             }
         }
->>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
         public void SaveVersionLog()
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
@@ -255,10 +243,10 @@ namespace Assets.Editor.Huatuo
             Debug.Log($"Save huatuo install version, path: {HuatuoVersionPath}");
             File.WriteAllText(HuatuoVersionPath, JsonUtility.ToJson(data, true), Encoding.UTF8);
         }
-        public static HuatuoVersion GetVersionData()
+        public static HuatuoRemoteConfig GetVersionData()
         {
             var data = File.ReadAllText(HuatuoVersionPath, Encoding.UTF8);
-            return JsonUtility.FromJson<HuatuoVersion>(data);
+            return JsonUtility.FromJson<HuatuoRemoteConfig>(data);
         }
         public void InstallHuatuo()
         {
@@ -280,14 +268,9 @@ namespace Assets.Editor.Huatuo
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp", "huatuo");
             Extract(zipPath, extractDir, installPath);
         }
-<<<<<<< HEAD
-        
-        public void InstallLibil2cpp()
-=======
         public void InstallIl2cpp()
->>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
         {
-            var zipFileName = $"il2cpp_huatuo-{version.libil2cppTag}";
+            var zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
             var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
             if (!File.Exists(zipPath))
             {
@@ -391,7 +374,6 @@ namespace Assets.Editor.Huatuo
                 throw;
             }
         }
-        */
     }
 
 }

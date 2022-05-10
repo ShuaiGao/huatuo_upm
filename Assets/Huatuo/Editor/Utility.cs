@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Assets.Editor.Huatuo
+namespace Huatuo.Editor
 {
     /// <summary>
     /// 这个类是Huatuo编辑器中使用到的各种小工具

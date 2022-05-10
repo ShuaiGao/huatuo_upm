@@ -14,7 +14,7 @@ using Editor.Huatuo.ThirdPart;
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Assets.Editor.Huatuo
+namespace Huatuo.Editor
 {
     /// <summary>
     /// 这个类是Huatuo管理器，用于对Huatuo进行开关和更新等相关操作
@@ -28,11 +28,11 @@ namespace Assets.Editor.Huatuo
         private Texture2D m_texHeaderImg = null;
         private Rect m_rtHeader = Rect.zero;
 
-        private HuatuoVersion m_verHuatuo_il2cpp = null;
-        private HuatuoVersion m_verHuatuo = null;
+        private HuatuoRemoteConfig m_verHuatuo_il2cpp = null;
+        private HuatuoRemoteConfig m_verHuatuo = null;
 
-        private HuatuoVersion m_verHuatuoBack_il2cpp = null;
-        private HuatuoVersion m_verHuatuoBack = null;
+        private HuatuoRemoteConfig m_verHuatuoBack_il2cpp = null;
+        private HuatuoRemoteConfig m_verHuatuoBack = null;
 
         private bool m_bHasHuatuo = false;
         private bool m_bHasHuatoBack = false;
@@ -51,8 +51,7 @@ namespace Assets.Editor.Huatuo
         private EditorCoroutines.EditorCoroutine m_corFetchManifest = null;
         private EditorCoroutines.EditorCoroutine m_corUpgrade = null;
 
-        private HuatuoVersion m_remoteVerHuatuo = null;
-        private HuatuoVersion m_remoteVerHuatuoIl2Cpp = null;
+        private HuatuoRemoteConfig m_remoteConfig = null;
 
         private bool m_bVersionUnsported = false;
 
@@ -66,21 +65,21 @@ namespace Assets.Editor.Huatuo
             win.minSize = win.maxSize = WinSize;
             win.ShowUtility();
         }
-         /*[MenuItem("HuaTuo/Install with github", false, 3)]
-        public static void InstallByGithub()
-        {
-            var version = new HuatuoVersion();
-            version.huatuoTag = "0.0.1";
-            version.libil2cppTag = "2020.3.33-0.0.1";
-            new Installer(true, version).Install();
-        }
-        //[MenuItem("HuaTuo/Install/gitee", false, 3)]
-        //public static void InstallByGitee()
-        //{
-        //    var version = new HuatuoVersion();
-        //    version.huatuoTag = "0.0.1";
-        //    new Installer(false, version).Install();
-        //}
+        /*[MenuItem("HuaTuo/Install with github", false, 3)]
+       public static void InstallByGithub()
+       {
+           var version = new HuatuoVersion();
+           version.huatuoTag = "0.0.1";
+           version.libil2cppTag = "2020.3.33-0.0.1";
+           new Installer(true, version).Install();
+       }
+       //[MenuItem("HuaTuo/Install/gitee", false, 3)]
+       //public static void InstallByGitee()
+       //{
+       //    var version = new HuatuoVersion();
+       //    version.huatuoTag = "0.0.1";
+       //    new Installer(false, version).Install();
+       //}
 */
 
         private void OnEnable()
@@ -93,7 +92,7 @@ namespace Assets.Editor.Huatuo
         /// </summary>
         /// <param name="basePath">待检查的根目录</param>
         /// <returns>如果存在版本文件，则返回相应的版本信息，否则返回空</returns>
-        private static HuatuoVersion CheckVersion(string basePath)
+        private static HuatuoRemoteConfig CheckVersion(string basePath)
         {
             var verFile = basePath + "/version.json";
             if (!File.Exists(verFile))
@@ -107,7 +106,7 @@ namespace Assets.Editor.Huatuo
                 return null;
             }
 
-            return JsonUtility.FromJson<HuatuoVersion>(txt);
+            return JsonUtility.FromJson<HuatuoRemoteConfig>(txt);
         }
 
         /// <summary>
@@ -147,20 +146,20 @@ namespace Assets.Editor.Huatuo
                 }
             }
 
-            if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null && m_corUpgrade == null)
-            {
-                Func<string, string, int> comp = (a, b) => Utility.CompareVersions(a, b);
-                if (m_verHuatuo != null && m_verHuatuo_il2cpp != null)
-                {
-                    m_bNeedUpgrade = comp(m_remoteVerHuatuoIl2Cpp.ver, m_verHuatuo_il2cpp.ver) > 0 ||
-                                     comp(m_remoteVerHuatuo.ver, m_verHuatuo.ver) > 0;
-                }
-                else if (m_verHuatuoBack != null && m_verHuatuoBack_il2cpp != null)
-                {
-                    m_bNeedUpgrade = comp(m_remoteVerHuatuoIl2Cpp.ver, m_verHuatuoBack_il2cpp.ver) > 0 ||
-                                     comp(m_remoteVerHuatuo.ver, m_verHuatuoBack.ver) > 0;
-                }
-            }
+            //if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null && m_corUpgrade == null)
+            //{
+            //    Func<string, string, int> comp = (a, b) => Utility.CompareVersions(a, b);
+            //    if (m_verHuatuo != null && m_verHuatuo_il2cpp != null)
+            //    {
+            //        m_bNeedUpgrade = comp(m_remoteVerHuatuoIl2Cpp.ver, m_verHuatuo_il2cpp.ver) > 0 ||
+            //                         comp(m_remoteVerHuatuo.ver, m_verHuatuo.ver) > 0;
+            //    }
+            //    else if (m_verHuatuoBack != null && m_verHuatuoBack_il2cpp != null)
+            //    {
+            //        m_bNeedUpgrade = comp(m_remoteVerHuatuoIl2Cpp.ver, m_verHuatuoBack_il2cpp.ver) > 0 ||
+            //                         comp(m_remoteVerHuatuo.ver, m_verHuatuoBack.ver) > 0;
+            //    }
+            //}
         }
 
         /// <summary>
@@ -299,28 +298,23 @@ namespace Assets.Editor.Huatuo
                 var needDownload =
                     new Dictionary<string, (string url, string tmpfile, string hash, string unzipPath, string verstr)
                     >();
-                if (!m_remoteVerHuatuoIl2Cpp.Compare(m_verHuatuo_il2cpp))
-                {
-                    needDownload.Add(Config.HuatuoIL2CPPBackPath,
-                        ($"{Config.IL2CPPManifestUrl}/{m_remoteVerHuatuoIl2Cpp.ver}.zip",
-                            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}.zip", m_remoteVerHuatuoIl2Cpp.hash,
-                            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}_dir",
-                            JsonUtility.ToJson(m_remoteVerHuatuoIl2Cpp)));
-                    
-                    needDownload.Add(Config.HuatuoBackPath,
-                        ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
-                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}.zip", m_remoteVerHuatuo.hash,
-                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}_dir",
-                            JsonUtility.ToJson(m_remoteVerHuatuo)));
-                }
-                else if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
-                {
-                    needDownload.Add(Config.HuatuoBackPath,
-                        ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
-                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}.zip", m_remoteVerHuatuo.hash,
-                            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}_dir",
-                            JsonUtility.ToJson(m_remoteVerHuatuo)));
-                }
+                //if (!m_remoteVerHuatuoIl2Cpp.Compare(m_verHuatuo_il2cpp))
+                //{
+                //    needDownload.Add(Config.HuatuoIL2CPPBackPath,
+                //        ($"{Config.IL2CPPManifestUrl}/{m_remoteVerHuatuoIl2Cpp.ver}.zip",
+                //            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}.zip", m_remoteVerHuatuoIl2Cpp.hash,
+                //            $"{Config.DownloadCache}/{m_remoteVerHuatuoIl2Cpp.ver}_dir",
+                //            JsonUtility.ToJson(m_remoteVerHuatuoIl2Cpp)));
+                //}
+
+                //if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
+                //{
+                //    needDownload.Add(Config.HuatuoBackPath,
+                //        ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
+                //            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}.zip", m_remoteVerHuatuo.hash,
+                //            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}_dir",
+                //            JsonUtility.ToJson(m_remoteVerHuatuo)));
+                //}
 
                 var downloading = 0;
                 foreach (var kv in needDownload)
@@ -371,7 +365,7 @@ namespace Assets.Editor.Huatuo
                         itor = Utility.UnzipAsync(kv.Value.tmpfile, kv.Value.unzipPath, b => { cnt = b; }, p =>
                         {
                             EditorUtility.DisplayProgressBar($"解压中...{unzipCnt}/{needDownload.Count}", $"{p}/{cnt}",
-                                (float) p / cnt);
+                                (float)p / cnt);
                         }, () => { }, () => { haserr = true; });
                         while (itor.MoveNext())
                         {
@@ -502,7 +496,7 @@ namespace Assets.Editor.Huatuo
                     Installer.Uninstall(ret =>
                     {
                         EditorUtility.DisplayDialog("提示", $"卸载完毕。{(string.IsNullOrEmpty(ret) ? " " : ret)}", "ok");
-                        
+
                         ReloadVersion();
                     });
                 }
@@ -528,22 +522,22 @@ namespace Assets.Editor.Huatuo
                 GUILayout.Label("正在获取配置文件...", m_styleNormalFont);
             }
 
-            if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"新版本:\tHuatuo:{m_remoteVerHuatuo.ver}\tIL2CPP:{m_remoteVerHuatuoIl2Cpp.ver}",
-                    m_styleNormalFont);
+            //if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null)
+            //{
+            //    GUILayout.BeginHorizontal();
+            //    GUILayout.Label($"新版本:\tHuatuo:{m_remoteVerHuatuo.ver}\tIL2CPP:{m_remoteVerHuatuoIl2Cpp.ver}",
+            //        m_styleNormalFont);
 
-                if (m_bNeedUpgrade && m_corUpgrade == null)
-                {
-                    if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn))
-                    {
-                        Upgrade();
-                    }
-                }
+            //    if (m_bNeedUpgrade && m_corUpgrade == null)
+            //    {
+            //        if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn))
+            //        {
+            //            Upgrade();
+            //        }
+            //    }
 
-                GUILayout.EndHorizontal();
-            }
+            //    GUILayout.EndHorizontal();
+            //}
         }
 
         /// <summary>
@@ -568,7 +562,7 @@ namespace Assets.Editor.Huatuo
             Install(strhuatuoFile, stril2CppFile);
         }
 
-        private IEnumerator Get(string url, bool silent, Action<HuatuoVersion> callback)
+        private IEnumerator HttpRequest(string url, bool silent, Action<HuatuoRemoteConfig> callback)
         {
             Debug.Log($"Fetching {url}");
             using var www = new UnityWebRequest(url)
@@ -579,7 +573,7 @@ namespace Assets.Editor.Huatuo
             };
             yield return www.SendWebRequest();
 
-            HuatuoVersion ret = null;
+            HuatuoRemoteConfig ret = null;
             do
             {
                 if (!string.IsNullOrEmpty(www.error))
@@ -607,7 +601,7 @@ namespace Assets.Editor.Huatuo
                     break;
                 }
 
-                ret = JsonUtility.FromJson<HuatuoVersion>(json);
+                ret = JsonUtility.FromJson<HuatuoRemoteConfig>(json);
                 if (ret == null)
                 {
                     Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
@@ -632,26 +626,16 @@ namespace Assets.Editor.Huatuo
         private IEnumerator GetSdkVersions(bool silent, Action callback)
         {
             m_bVersionUnsported = false;
-            m_remoteVerHuatuo = null;
-            m_remoteVerHuatuoIl2Cpp = null;
 
             // Wait one frame so that we don't try to show the progress bar in the middle of OnGUI().
             yield return null;
 
-            var itor = Get(Config.HuatuoManifestUrl + "/manifest.json", silent, r1 => { m_remoteVerHuatuo = r1; });
+            var itor = HttpRequest(Config.urlVersionConfig, silent, r1 => { m_remoteConfig = r1; });
             while (itor.MoveNext())
             {
                 yield return itor.Current;
             }
-
-            itor = Get(Config.IL2CPPManifestUrl + "/manifest.json", silent, r2 => { m_remoteVerHuatuoIl2Cpp = r2; });
-            while (itor.MoveNext())
-            {
-                yield return itor.Current;
-            }
-
             m_corFetchManifest = null;
-
             callback?.Invoke();
         }
 
@@ -675,16 +659,16 @@ namespace Assets.Editor.Huatuo
             //{
             //    Application.OpenURL(Config.Changelog);
             //}
-            /*
+
             if (GUILayout.Button("Install", m_styleFooterBtn))
             {
                 // TODO 选择安装版本， 可以单独安装huatuo或il2cpp
                 // 使用推荐版本安装
-                var version = new HuatuoVersion();
-                version.huatuoTag = m_verRemote.huatuo_recommend_version;
-                version.libil2cppTag = m_verRemote.il2cpp_recommend_version;
+                var version = new InstallVersion();
+                version.huatuoTag = m_remoteConfig.huatuo_recommend_version;
+                version.il2cppTag = m_remoteConfig.GetIl2cppRecommendVersion();
                 new Installer(true, version).Install();
-            }*/
+            }
 
             EditorGUI.BeginDisabledGroup(busying);
             if (GUILayout.Button("强制修复", m_styleFooterBtn))
@@ -694,31 +678,38 @@ namespace Assets.Editor.Huatuo
                     EditorUtility.DisplayDialog("------", "暂未实现~~", "ok");
                 }
             }
-            
+
             if (GUILayout.Button("Check Updates", m_styleFooterBtn))
             {
-                if (m_corUpgrade != null)
-                {
-                    return;
-                }
-
-                if (m_corFetchManifest != null)
-                {
-                    this.StopCoroutine(m_corFetchManifest.routine);
-                    m_corFetchManifest = null;
-                }
-
-                m_corFetchManifest = this.StartCoroutine(GetSdkVersions(false, () =>
-                {
-                    ReloadVersion();
-
-                    EditorUtility.DisplayDialog("", m_bNeedUpgrade ? "有新版本了" : "已经是最新版本了", "OK");
-                }));
+                this.CheckUpdate();
             }
 
             EditorGUI.EndDisabledGroup();
 
             GUILayout.EndHorizontal();
+        }
+        private void CheckUpdate()
+        {
+            if (m_corUpgrade != null)
+            {
+                return;
+            }
+
+            if (m_corFetchManifest != null)
+            {
+                this.StopCoroutine(m_corFetchManifest.routine);
+                m_corFetchManifest = null;
+            }
+
+            m_corFetchManifest = this.StartCoroutine(GetSdkVersions(false, () =>
+            {
+                ReloadVersion();
+                var s = JsonUtility.ToJson(m_remoteConfig, true);
+                Debug.Log($"remote version config: {s}");
+                Debug.Log($"huatuo version: {m_remoteConfig.huatuo_recommend_version}");
+                Debug.Log($"il2cpp version: {m_remoteConfig.il2cpp_recommend_version}");
+                EditorUtility.DisplayDialog("", m_bNeedUpgrade ? "有新版本了" : "已经是最新版本了", "OK");
+            }));
         }
 
         private void OnGUI()

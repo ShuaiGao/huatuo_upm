@@ -9,7 +9,7 @@ using UnityEngine;
 //   ldr123 (ldr12@163.com)
 //
 
-namespace Assets.Editor.Huatuo
+namespace Huatuo.Editor
 {
     /// <summary>
     /// 这个类存放各种常量信息
@@ -21,6 +21,10 @@ namespace Assets.Editor.Huatuo
         public static string IL2CPPManifestUrl = "";
         private static string ManifestBaseURL = "https://ldr123.github.io/release";
         public static string HuatuoManifestUrl = ManifestBaseURL + "/huatuo";
+
+        private static readonly string baseDomain = "https://focus-creative-games.github.io/focus-creative-games";
+        public static readonly string urlVersionConfig = $"{baseDomain}/version.json";
+
         private static readonly string WebSiteBase = "https://github.com/focus-creative-games/huatuo";
         public static readonly string WebSite = WebSiteBase;
         public static readonly string Document = WebSiteBase;
