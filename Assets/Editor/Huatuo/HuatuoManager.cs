@@ -115,6 +115,7 @@ namespace Assets.Editor.Huatuo
         /// </summary>
         private void ReloadVersion()
         {
+            m_bNeedUpgrade = false;
             m_bHasHuatuo = Directory.Exists(Config.HuatuoIL2CPPPath) && Directory.Exists(Config.HuatuoPath);
             m_bHasHuatoBack = Directory.Exists(Config.HuatuoIL2CPPBackPath) && Directory.Exists(Config.HuatuoBackPath);
             m_bHasIl2cpp = Directory.Exists(Config.LibIl2cppPath);
@@ -488,7 +489,7 @@ namespace Assets.Editor.Huatuo
 
                 if (GUILayout.Button("卸载", m_styleNormalBtn))
                 {
-                    if (m_bHasHuatuo)
+                    if (m_bHasHuatoBack)
                     {
                         EnableOrDisable(true);
                     }
@@ -496,6 +497,8 @@ namespace Assets.Editor.Huatuo
                     Installer.Uninstall(ret =>
                     {
                         EditorUtility.DisplayDialog("提示", $"卸载完毕。{(string.IsNullOrEmpty(ret) ? " " : ret)}", "ok");
+                        
+                        ReloadVersion();
                     });
                 }
             }
