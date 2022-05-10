@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -37,10 +38,11 @@ namespace Huatuo.Editor
         public static readonly string HuatuoIL2CPPBackPath = EditorBasePath + "/il2cpp/libil2cpp_huatuo";
         public static readonly string HuatuoBackPath = HuatuoIL2CPPBackPath + "/huatuo";
         public static readonly string LibIl2cppPath = EditorBasePath + "/il2cpp/libil2cpp";
+        public static readonly string Il2cppPath = EditorBasePath + "/il2cpp";
         public static readonly string LibIl2cppBackPath = EditorBasePath + "/il2cpp/libil2cpp_back";
 
         public static string DownloadCache = "";
-
+        public static string HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
         public static void Init()
         {
             IL2CPPManifestUrl = ManifestBaseURL + "/" + InternalEditorUtility.GetUnityVersionDigits();

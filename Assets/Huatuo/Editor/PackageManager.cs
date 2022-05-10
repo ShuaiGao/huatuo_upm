@@ -23,17 +23,24 @@ namespace Huatuo.Editor
                 return instance;
             }
         }
-        public static string CacheDir = ".huatuo_cache";
+        private static string CacheDirName = ".huatuo_cache";
         public string CacheBasePath;
 
         PackageManager()
         {
-            // create cache dir
-            if(!Directory.Exists(CacheBasePath))
+        }
+        public void SetCacheDirectory(string path)
+        {
+            if (path == null || path.Length == 0)
             {
-                CacheBasePath = Path.Combine(Path.GetFullPath("."), CacheDir);
-                Directory.CreateDirectory(CacheBasePath);
+                CacheBasePath = Path.Combine(Path.GetFullPath("."), CacheDirName);
             }
+            else
+            {
+                CacheBasePath = path;
+            }
+            Directory.CreateDirectory(CacheBasePath);
+            Installer.Instance.SaveCacheDir();
         }
         public IEnumerator DownLoad(string url, string fileName, string hashCode)
         {
@@ -42,7 +49,6 @@ namespace Huatuo.Editor
             {
                 yield return null;
             }
-            bool haserr;
             var itor = Utility.DownloadFile(url, filePath,
                         p =>
                         {
@@ -52,7 +58,6 @@ namespace Huatuo.Editor
                         {
                             if (!string.IsNullOrEmpty(ret))
                             {
-                                haserr = true;
                                 EditorUtility.DisplayDialog("错误", $"下载{fileName}出错.\n{ret}", "ok");
                             }
                         }, false);

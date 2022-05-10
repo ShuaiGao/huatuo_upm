@@ -7,6 +7,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Networking;
 using Editor.Huatuo.ThirdPart;
+using System.Text;
 
 // HuatuoManager.cs
 //
@@ -24,7 +25,7 @@ namespace Huatuo.Editor
         private static readonly Vector2 WinSize = new Vector2(620f, 400);
 
         private bool m_bInitialized = false;
-        
+
         private Logo m_logo = null;
 
         private HuatuoRemoteConfig m_verHuatuo_il2cpp = null;
@@ -46,6 +47,7 @@ namespace Huatuo.Editor
         private GUIStyle m_styleWarningFont = null;
         private GUIStyle m_styleNormalBtn = null;
         private GUIStyle m_styleFooterBtn = null;
+        private GUIStyle m_styleUninstallBtn = null;
 
         private EditorCoroutines.EditorCoroutine m_corFetchManifest = null;
         private EditorCoroutines.EditorCoroutine m_corUpgrade = null;
@@ -116,7 +118,7 @@ namespace Huatuo.Editor
             m_bNeedUpgrade = false;
             m_bHasHuatuo = Directory.Exists(Config.HuatuoIL2CPPPath) && Directory.Exists(Config.HuatuoPath);
             m_bHasHuatoBack = Directory.Exists(Config.HuatuoIL2CPPBackPath) && Directory.Exists(Config.HuatuoBackPath);
-            m_bHasIl2cpp = Directory.Exists(Config.LibIl2cppPath);
+            m_bHasIl2cpp = Directory.Exists(Config.Il2cppPath);
             m_bHasIl2cppBack = Directory.Exists(Config.LibIl2cppBackPath);
 
             m_verHuatuo = null;
@@ -145,6 +147,8 @@ namespace Huatuo.Editor
                 }
             }
 
+            Installer.Instance.Init();
+
             //if (m_remoteVerHuatuo != null && m_remoteVerHuatuoIl2Cpp != null && m_corUpgrade == null)
             //{
             //    Func<string, string, int> comp = (a, b) => Utility.CompareVersions(a, b);
@@ -172,7 +176,7 @@ namespace Huatuo.Editor
             }
 
             Config.Init();
-            
+
             m_logo = new Logo();
             m_logo.Init(WinSize);
 
@@ -229,6 +233,10 @@ namespace Huatuo.Editor
             {
                 padding = new RectOffset(0, 0, 10, 10)
             };
+            m_styleUninstallBtn = new GUIStyle(m_styleFooterBtn)
+            {
+                padding = new RectOffset(0, 0, 10, 10)
+            };
         }
 
         /// <summary>
@@ -271,8 +279,7 @@ namespace Huatuo.Editor
             var version = new InstallVersion();
             version.huatuoTag = m_remoteConfig.huatuo_recommend_version;
             version.il2cppTag = m_remoteConfig.GetIl2cppRecommendVersion();
-            new Installer(true, version).Install();
-            
+            Installer.Instance.Install(true, version);
         }
 
 
@@ -448,6 +455,14 @@ namespace Huatuo.Editor
         /// </summary>
         private void InstallOrUpgradeGui()
         {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"<color=white>Unity3D:\t{Config.UnityFullVersion}</color>", m_styleNormalFont);
+            if (GUILayout.Button("修改缓存路径", m_styleNormalBtn))
+            {
+                ChangeCacheDir();
+            }
+            GUILayout.EndHorizontal();
+
             if (!m_bHasIl2cpp)
             {
                 GUILayout.Label("<color=red>Scripting Backend(IL2CPP) is not installed!</color>", m_styleWarningFont);
@@ -467,6 +482,7 @@ namespace Huatuo.Editor
                 return;
             }
 
+
             var strMsg = "";
             var strColor = "<color=green>";
             if (m_bHasHuatuo)
@@ -479,6 +495,12 @@ namespace Huatuo.Editor
                 strMsg = $"Huatuo:{m_verHuatuoBack.ver}\tIL2CPP:{m_verHuatuoBack_il2cpp.ver}";
             }
 
+            var installVersion = Installer.Instance.huatuoVersion;
+            if (installVersion.HuatuoTag.Length > 0)
+            {
+                strMsg = $"Huatuo: {installVersion.HuatuoTag}\tIL2CPP: {installVersion.Il2cppTag}";
+            }
+
 
             GUILayout.Space(8f);
             GUILayout.BeginHorizontal();
@@ -486,6 +508,7 @@ namespace Huatuo.Editor
             {
                 strMsg = $"{strColor}已安装:\t{strMsg}</color>";
                 GUILayout.Label(strMsg, m_styleNormalFont);
+                EditorGUI.BeginDisabledGroup(true);
                 if (GUILayout.Button(m_bHasHuatuo ? "禁用" : "启用", m_styleNormalBtn))
                 {
                     EnableOrDisable(!m_bHasHuatuo);
@@ -505,6 +528,7 @@ namespace Huatuo.Editor
                         ReloadVersion();
                     });
                 }
+                EditorGUI.EndDisabledGroup();
             }
             else
             {
@@ -512,13 +536,13 @@ namespace Huatuo.Editor
                 GUILayout.Label("未安装", m_styleNormalFont);
             }
 
-            EditorGUI.BeginDisabledGroup(true);
-            if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "手动安装" : "手动更新", m_styleNormalBtn))
-            {
-                Manual();
-            }
 
-            EditorGUI.EndDisabledGroup();
+            //EditorGUI.BeginDisabledGroup(true);
+            //if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "手动安装" : "手动更新", m_styleNormalBtn))
+            //{
+            //    Manual();
+            //}
+            //EditorGUI.EndDisabledGroup();
 
             GUILayout.EndHorizontal();
 
@@ -530,7 +554,7 @@ namespace Huatuo.Editor
             if (m_remoteConfig != null)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"推荐版本:\tHuatuo:{m_remoteConfig.huatuo_recommend_version}\tIL2CPP:{m_remoteConfig.GetIl2cppRecommendVersion()}",
+                GUILayout.Label($"推荐版本:\tHuatuo: {m_remoteConfig.huatuo_recommend_version}\tIL2CPP: {m_remoteConfig.GetIl2cppRecommendVersion()}",
                     m_styleNormalFont);
 
                 if (m_bNeedUpgrade && m_corUpgrade == null)
@@ -545,6 +569,20 @@ namespace Huatuo.Editor
             }
         }
 
+        private void ChangeCacheDir()
+        {
+            var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", PackageManager.Instance.CacheBasePath, "");
+            if (cachePath.Length == 0)
+            {
+                return;
+            }
+            if (!Directory.Exists(cachePath))
+            {
+                EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
+                return;
+            }
+            PackageManager.Instance.SetCacheDirectory(cachePath);
+        }
         /// <summary>
         /// 手动安装
         /// </summary>
@@ -589,7 +627,7 @@ namespace Huatuo.Editor
                         EditorUtility.DisplayDialog("错误", $"【1】获取远程版本信息错误。\n[{www.error}]", "ok");
                     }
 
-                    m_bVersionUnsported = www.error.Contains("404") && www.error.Contains("Found");
+                    //m_bVersionUnsported = www.error.Contains("404") && www.error.Contains("Found");
 
                     break;
                 }
@@ -635,7 +673,15 @@ namespace Huatuo.Editor
             // Wait one frame so that we don't try to show the progress bar in the middle of OnGUI().
             yield return null;
 
-            var itor = HttpRequest(Config.urlVersionConfig, silent, r1 => { m_remoteConfig = r1; });
+            var itor = HttpRequest(Config.urlVersionConfig, silent, r1 =>
+            {
+                m_remoteConfig = r1;
+                var unityVersion = InternalEditorUtility.GetUnityVersionDigits();
+                if (!m_remoteConfig.unity_version.Contains(unityVersion))
+                {
+                    m_bVersionUnsported = true;
+                }
+            });
             while (itor.MoveNext())
             {
                 yield return itor.Current;
@@ -665,6 +711,10 @@ namespace Huatuo.Editor
             //    Application.OpenURL(Config.Changelog);
             //}
 
+            if (GUILayout.Button("Check Updates", m_styleFooterBtn))
+            {
+                this.CheckUpdate();
+            }
             if (GUILayout.Button("Install", m_styleFooterBtn))
             {
                 // TODO 选择安装版本， 可以单独安装huatuo或il2cpp
@@ -672,22 +722,23 @@ namespace Huatuo.Editor
                 var version = new InstallVersion();
                 version.huatuoTag = m_remoteConfig.huatuo_recommend_version;
                 version.il2cppTag = m_remoteConfig.GetIl2cppRecommendVersion();
-                new Installer(true, version).Install();
+                Installer.Instance.Install(true, version);
             }
 
             EditorGUI.BeginDisabledGroup(busying);
-            if (GUILayout.Button("强制修复", m_styleFooterBtn))
+            //if (GUILayout.Button("强制修复", m_styleFooterBtn))
+            //{
+            //    if (EditorUtility.DisplayDialog("警告", "只有更新失败的时候才会使用强制修复功能，确定强制修复吗？", "是", "不用了"))
+            //    {
+            //        EditorUtility.DisplayDialog("------", "暂未实现~~", "ok");
+            //    }
+            //}
+
+            if (GUILayout.Button("Uninstall", m_styleFooterBtn))
             {
-                if (EditorUtility.DisplayDialog("警告", "只有更新失败的时候才会使用强制修复功能，确定强制修复吗？", "是", "不用了"))
-                {
-                    EditorUtility.DisplayDialog("------", "暂未实现~~", "ok");
-                }
+                Uninstaller.DoUninstall();
             }
 
-            if (GUILayout.Button("Check Updates", m_styleFooterBtn))
-            {
-                this.CheckUpdate();
-            }
 
             EditorGUI.EndDisabledGroup();
 
@@ -720,15 +771,13 @@ namespace Huatuo.Editor
         private void OnGUI()
         {
             CheckStyle();
-            
+
             if (m_logo != null)
             {
                 m_logo.OnGUI();
-                
+
                 GUILayout.Space(m_logo.ImgHeight + 16f);
             }
-
-            GUILayout.Label($"<color=white>Unity3D:\t{Config.UnityFullVersion}</color>", m_styleNormalFont);
 
             EditorGUI.BeginDisabledGroup(busying);
 

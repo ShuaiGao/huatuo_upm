@@ -13,14 +13,15 @@ namespace Huatuo.Editor
     [Serializable]
     internal struct HuatuoVersion
     {
-        public string huatuoTag;
-        public string libil2cppTag;
+        public string HuatuoTag;
+        public string Il2cppTag;
         public string ver;
         public string commitid;
-        public string Libil2cppUrl;
+        public string Il2cppUrl;
         public string HuatuoUrl;
         public string InstallTime;
         public long Timestamp;
+        public string CacheDir;
     }
     internal struct InstallVersion
     {
