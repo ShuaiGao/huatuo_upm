@@ -403,8 +403,8 @@ namespace Editor.Huatuo.ThirdPart
 			else
 			{
 				Debug.LogException(
-					new Exception("<" + coroutine.MethodName + "> yielded an unknown or unsupported type! (" +
-					              current.GetType() + ")"),
+					new Exception(
+						$"<{coroutine.MethodName}> yielded an unknown or unsupported type! ({current.GetType()})"),
 					null);
 				coroutine.currentYield = new YieldDefault();
 			}

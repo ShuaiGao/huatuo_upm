@@ -1,19 +1,76 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Editor.Huatuo.ThirdPart;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Assets.Editor.Huatuo
 {
-    internal class Installer
+    internal static class Installer
     {
+        public static void Enable(Action<string> callback)
+        {
+            var mv1 = Utility.Mv(Config.LibIl2cppPath, Config.LibIl2cppBackPath);
+            if (!string.IsNullOrEmpty(mv1))
+            {
+                Debug.LogError(mv1);
+                callback?.Invoke(mv1);
+                return;
+            }
+            
+            mv1 = Utility.Mv(Config.HuatuoIL2CPPBackPath, Config.HuatuoIL2CPPPath);
+            if (!string.IsNullOrEmpty(mv1))
+            {
+                Debug.LogError(mv1);
+                callback?.Invoke(mv1);
+                return;
+            }
+            
+            callback?.Invoke(null);
+        }
+
+        public static void Disable(Action<string> callback)
+        {
+            var mv1 = Utility.Mv(Config.HuatuoIL2CPPPath, Config.HuatuoIL2CPPBackPath);
+            if (!string.IsNullOrEmpty(mv1))
+            {
+                Debug.LogError(mv1);
+                callback?.Invoke(mv1);
+                return;
+            }
+            
+            mv1 = Utility.Mv(Config.LibIl2cppBackPath, Config.LibIl2cppPath);
+            if (!string.IsNullOrEmpty(mv1))
+            {
+                Debug.LogError(mv1);
+                callback?.Invoke(mv1);
+                return;
+            }
+            
+            callback?.Invoke(null);
+        }
+
+        public static void Uninstall(Action<string> callback)
+        {
+            Disable(ret =>
+            {
+                if (!string.IsNullOrEmpty(ret))
+                {
+                    callback?.Invoke(ret);
+                    return;
+                }
+
+                if (Directory.Exists(Config.HuatuoIL2CPPBackPath))
+                {
+                    Directory.Delete(Config.HuatuoIL2CPPBackPath, true);
+                }
+
+                callback?.Invoke(null);
+            });
+        }
+
+        /*
+=======
         private HuatuoVersion version;
         private string baseUrl;
         private bool useGithub;
@@ -92,7 +149,16 @@ namespace Assets.Editor.Huatuo
         }
         public void Install()
         {
+<<<<<<< HEAD
+            var zipPath = Path.Combine(Application.temporaryCachePath, "libil2cpp_huatuo.zip");
+            var downloadUrl = GetDownUrlLibil2cpp();
+            Debug.Log($"Download libil2cpp_huatuo url: {downloadUrl}");
+            Debug.Log($"Download libil2cpp_huatuo.zip path {zipPath}");
+            DownloadFile(downloadUrl, zipPath);
+            return;
+=======
             // 安装过程，不需要对比版本，有时候需要覆盖安装的
+>>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
             if (!CheckSupport())
             {
                 return;
@@ -145,6 +211,9 @@ namespace Assets.Editor.Huatuo
             // TODO 检查libil2cpp, huatuo 版本，避免不必要的更新
             return true;
         }
+<<<<<<< HEAD
+  
+=======
         public void UnBackupLibil2cpp()
         {
             if (!doBackup)
@@ -170,6 +239,7 @@ namespace Assets.Editor.Huatuo
                 Directory.Move(installPath, installPathBak);
             }
         }
+>>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
         public void SaveVersionLog()
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
@@ -210,7 +280,12 @@ namespace Assets.Editor.Huatuo
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp", "huatuo");
             Extract(zipPath, extractDir, installPath);
         }
+<<<<<<< HEAD
+        
+        public void InstallLibil2cpp()
+=======
         public void InstallIl2cpp()
+>>>>>>> 025bd66772e4c14ac85002450422bbdbd7912e2f
         {
             var zipFileName = $"il2cpp_huatuo-{version.libil2cppTag}";
             var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
@@ -316,6 +391,7 @@ namespace Assets.Editor.Huatuo
                 throw;
             }
         }
+        */
     }
 
 }

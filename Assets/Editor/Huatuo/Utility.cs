@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 using UnityEngine;
+using UnityEngine.Networking;
 
 // Utility.cs
 //
@@ -71,6 +73,11 @@ namespace Assets.Editor.Huatuo
         public static IEnumerator UnzipAsync(string zipFile, string destDir, Action<int> begin,
             Action<int> progress, Action complete, Action failure)
         {
+            if (Directory.Exists(destDir))
+            {
+                Directory.Delete(destDir, true);
+            }
+            
             Debug.Log($"[UnzipAsync]----:{zipFile} {destDir}");
             var tmpCnt = 0;
 
@@ -94,6 +101,83 @@ namespace Assets.Editor.Huatuo
             {
                 yield return itor.Current;
             }
+        }
+
+        /// <summary>
+        /// 移动目录
+        /// </summary>
+        /// <param name="src">源目录</param>
+        /// <param name="dst">目标目录</param>
+        /// <returns>错误信息</returns>
+        public static string Mv(string src, string dst)
+        {
+            var ret = "";
+            if (!Directory.Exists(src))
+            {
+                ret = $"Can't Find {src}";
+            }
+            else if (Directory.Exists(dst))
+            {
+                ret = $"{dst} Already Exists!";
+            }
+            else
+            {
+                Directory.Move(src, dst);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// 对https的请求不做证书验证
+        /// </summary>
+        private class IgnoreHttps : CertificateHandler
+        {
+            protected override bool ValidateCertificate(byte[] certificateData)
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="strUrl">来源url</param>
+        /// <param name="strDstFile">解压后的目录</param>
+        /// <param name="progress">下载进度</param>
+        /// <param name="done">下载完成，参数是错误信息</param>
+        /// <param name="bValidateCertificate">是否选择忽略证书检查</param>
+        /// <returns>协程</returns>
+        public static IEnumerator DownloadFile(string strUrl, string strDstFile,
+            Action<float> progress, Action<string> done, bool bValidateCertificate = true)
+        {
+            Debug.Log($"[DownloadFile]{strUrl}\ndest:{strDstFile}");
+            if (File.Exists(strDstFile))
+            {
+                File.Delete(strDstFile);
+            }
+
+            yield return null;
+
+            using var www = new UnityWebRequest(strUrl)
+            {
+                downloadHandler = new DownloadHandlerFile(strDstFile)
+            };
+
+            if (!bValidateCertificate)
+            {
+                www.certificateHandler = new IgnoreHttps();
+            }
+
+            progress?.Invoke(0f);
+            var req = www.SendWebRequest();
+            while (!req.isDone)
+            {
+                progress?.Invoke(req.progress);
+                yield return null;
+            }
+
+            done?.Invoke(www.error);
         }
     }
 }
