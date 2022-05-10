@@ -28,6 +28,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Split upm branch
         run: |
+          git branch -d upm &> /dev/null || echo upm branch not found
           git subtree split -P "$PKG_ROOT" -b upm
           git push -u origin upm
         env:
