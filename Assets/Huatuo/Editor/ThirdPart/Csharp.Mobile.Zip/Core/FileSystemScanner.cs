@@ -36,7 +36,7 @@
 
 using System;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core
 {
 	#region EventArgs
 	/// <summary>

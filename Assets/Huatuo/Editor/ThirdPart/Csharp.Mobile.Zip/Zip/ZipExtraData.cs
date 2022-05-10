@@ -37,7 +37,7 @@
 using System;
 using System.IO;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	// TODO: Sort out wether tagged data is useful and what a good implementation might look like.
 	// Its just a sketch of an idea at the moment.

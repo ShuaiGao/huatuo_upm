@@ -41,7 +41,7 @@ using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core
 {
 	/// <summary>
 	/// NameFilter is a string matching class which allows for both positive and negative

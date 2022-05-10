@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Editor.Huatuo.ThirdPart
+namespace Huatuo.Editor.ThirdPart
 {
     public class MD5
     {

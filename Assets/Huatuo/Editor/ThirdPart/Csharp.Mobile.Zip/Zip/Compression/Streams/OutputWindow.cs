@@ -39,7 +39,7 @@
 using System;
 
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams 
 {
 	
 	/// <summary>

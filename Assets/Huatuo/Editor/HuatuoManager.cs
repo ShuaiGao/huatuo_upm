@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Networking;
-using Editor.Huatuo.ThirdPart;
+using Huatuo.Editor.ThirdPart;
 using System.Text;
 
 // HuatuoManager.cs

@@ -36,9 +36,9 @@
 using System;
 using System.Collections;
 using System.IO;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	/// <summary>
 	/// FastZipEvents supports all events applicable to <see cref="FastZip">FastZip</see> operations.

@@ -41,7 +41,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Encryption {
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Encryption {
 
 	/// <summary>
 	/// Transforms stream using AES in CTR mode

@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 
-namespace Editor.Huatuo.ThirdPart
+namespace Huatuo.Editor.ThirdPart
 {
 	public class EditorCoroutines
 	{

@@ -38,7 +38,7 @@
 
 using System;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums 
 {
 	/// <summary>
 	/// Bzip2 checksum algorithm

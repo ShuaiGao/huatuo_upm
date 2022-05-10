@@ -35,9 +35,9 @@
 // obligated to do so.  If you do not wish to do so, delete this
 // exception statement from your version.
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	/// <summary>
 	/// Defines factory methods for creating new <see cref="ZipEntry"></see> values.

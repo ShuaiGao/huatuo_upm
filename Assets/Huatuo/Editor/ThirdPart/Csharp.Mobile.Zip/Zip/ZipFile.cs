@@ -50,15 +50,15 @@ using System.Globalization;
 
 #if !NETCF_1_0
 using System.Security.Cryptography;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
 #endif
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip 
 {
 	#region Keys Required Event Args
 	/// <summary>
@@ -315,7 +315,7 @@ namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
 	/// using System.Collections;
 	/// using System.IO;
 	/// 
-	/// using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+	/// using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 	/// 
 	/// class MainClass
 	/// {

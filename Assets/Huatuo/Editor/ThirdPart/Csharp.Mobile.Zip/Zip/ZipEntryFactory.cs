@@ -38,9 +38,9 @@
 using System;
 using System.IO;
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	/// <summary>
 	/// Basic implementation of <see cref="IEntryFactory"></see>

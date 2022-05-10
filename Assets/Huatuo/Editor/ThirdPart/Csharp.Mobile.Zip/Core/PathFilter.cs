@@ -36,7 +36,7 @@
 using System;
 using System.IO;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core
 {
 	/// <summary>
 	/// PathFilter filters directories and files using a form of <see cref="System.Text.RegularExpressions.Regex">regular expressions</see>

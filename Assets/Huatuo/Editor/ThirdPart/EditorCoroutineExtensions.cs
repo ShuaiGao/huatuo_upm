@@ -23,7 +23,7 @@ SOFTWARE.
 using System.Collections;
 using UnityEditor;
 
-namespace Editor.Huatuo.ThirdPart
+namespace Huatuo.Editor.ThirdPart
 {
 	public static class EditorCoroutineExtensions
 	{

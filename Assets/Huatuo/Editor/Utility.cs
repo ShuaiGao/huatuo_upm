@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 using UnityEngine;
 using UnityEngine.Networking;
 

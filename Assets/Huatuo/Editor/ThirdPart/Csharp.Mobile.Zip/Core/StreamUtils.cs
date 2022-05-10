@@ -36,7 +36,7 @@
 using System;
 using System.IO;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core
 {
 	/// <summary>
 	/// Provides simple <see cref="Stream"/>" utilities.

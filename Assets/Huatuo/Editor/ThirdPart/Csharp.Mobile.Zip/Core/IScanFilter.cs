@@ -33,7 +33,7 @@
 // obligated to do so.  If you do not wish to do so, delete this
 // exception statement from your version.
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core
 {
 	/// <summary>
 	/// Scanning filters support filtering of names.

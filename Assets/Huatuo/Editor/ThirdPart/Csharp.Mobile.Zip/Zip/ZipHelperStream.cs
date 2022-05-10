@@ -37,7 +37,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 
 	/// <summary>

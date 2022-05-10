@@ -39,7 +39,7 @@ using System;
 using System.Runtime.Serialization;
 #endif
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib
 {
 	/// <summary>
 	/// SharpZipBaseException is the base exception class for the SharpZipLibrary.

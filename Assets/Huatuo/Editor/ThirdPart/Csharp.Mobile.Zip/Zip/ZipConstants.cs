@@ -48,7 +48,7 @@ using System.Threading;
 using System.Globalization;
 #endif
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip 
 {
 
 	#region Enumerations

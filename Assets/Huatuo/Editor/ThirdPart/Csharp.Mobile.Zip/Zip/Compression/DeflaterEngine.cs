@@ -39,9 +39,9 @@
 
 using System;
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression 
 {
 	
 	/// <summary>

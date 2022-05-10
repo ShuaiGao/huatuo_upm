@@ -45,11 +45,11 @@ using System;
 using System.IO;
 using System.Collections;
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	/// <summary>
 	/// This is a DeflaterOutputStream that writes the files into a zip
@@ -67,8 +67,8 @@ namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
 	/// using System;
 	/// using System.IO;
 	/// 
-	/// using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Core;
-	/// using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+	/// using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Core;
+	/// using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 	/// 
 	/// class MainClass
 	/// {

@@ -40,9 +40,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Encryption
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Encryption
 {
 	/// <summary>
 	/// PkzipClassic embodies the classic or original encryption facilities used in Pkzip archives.

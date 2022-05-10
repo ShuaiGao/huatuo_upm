@@ -43,15 +43,15 @@
 using System;
 using System.IO;
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 #if !NETCF_1_0
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
 #endif
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip
 {
 	/// <summary>
 	/// This is an InflaterInputStream that reads the files baseInputStream an zip archive
@@ -69,7 +69,7 @@ namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip
 	/// using System.Text;
 	/// using System.IO;
 	/// 
-	/// using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+	/// using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 	/// 
 	/// class MainClass
 	/// {

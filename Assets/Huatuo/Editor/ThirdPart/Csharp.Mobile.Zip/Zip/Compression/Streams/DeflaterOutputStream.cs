@@ -44,10 +44,10 @@ using System.IO;
 
 #if !NETCF_1_0
 using System.Security.Cryptography;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Encryption;
 #endif
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams 
 {
 	/// <summary>
 	/// A special stream deflating or compressing the bytes that are

@@ -39,10 +39,10 @@
 
 using System;
 
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
-using Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Checksums;
+using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
-namespace Editor.Huatuo.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression 
+namespace Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip.Compression 
 {
 	/// <summary>
 	/// Inflater is used to decompress data that has been compressed according
