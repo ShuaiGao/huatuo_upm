@@ -9,16 +9,16 @@ using UnityEditor;
 
 namespace Huatuo.Editor
 {
-    internal class PackageManager
+    internal class HTEditorCache
     {
-        private static PackageManager instance = null;
-        public static PackageManager Instance
+        private static HTEditorCache instance = null;
+        public static HTEditorCache Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new PackageManager();
+                    instance = new HTEditorCache();
                 }
                 return instance;
             }
@@ -26,7 +26,7 @@ namespace Huatuo.Editor
         private static string CacheDirName = ".huatuo_cache";
         public string CacheBasePath;
 
-        PackageManager()
+        HTEditorCache()
         {
         }
         public void SetCacheDirectory(string path)
@@ -40,7 +40,7 @@ namespace Huatuo.Editor
                 CacheBasePath = path;
             }
             Directory.CreateDirectory(CacheBasePath);
-            Installer.Instance.SaveCacheDir();
+            HTEditorInstaller.Instance.SaveCacheDir();
         }
         public IEnumerator DownLoad(string url, string fileName, string hashCode)
         {
@@ -49,7 +49,7 @@ namespace Huatuo.Editor
             {
                 yield return null;
             }
-            var itor = Utility.DownloadFile(url, filePath,
+            var itor = HTEditorUtility.DownloadFile(url, filePath,
                         p =>
                         {
                             //EditorUtility.DisplayProgressBar("下载中...", $"{downloading}/{needDownload.Count}", p); 

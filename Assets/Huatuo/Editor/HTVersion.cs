@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using UnityEditorInternal;
 
-// Version.cs
-//
-// Author:
-//   ldr123 (ldr12@163.com)
-//
 
 namespace Huatuo.Editor
 {
@@ -48,6 +43,22 @@ namespace Huatuo.Editor
         private string use_huatuo_version;
         private string use_il2cpp_version;
 
+        public List<string> GetIl2cppVersion()
+        {
+            var ret =new List<string>();
+            if(il2cpp_version == null)
+            {
+                return ret;
+            }
+            foreach(string version in il2cpp_version)
+            {
+                if(version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                {
+                    ret.Add(version);
+                }
+            }
+            return ret;
+        }
         public string GetIl2cppRecommendVersion()
         {
             foreach (string version in il2cpp_recommend_version)
@@ -84,7 +95,7 @@ namespace Huatuo.Editor
                 return true;
             }
 
-            return Utility.CompareVersions(ver, other.ver) >= 0;
+            return HTEditorUtility.CompareVersions(ver, other.ver) >= 0;
         }
     }
 }

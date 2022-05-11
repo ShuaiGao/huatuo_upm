@@ -1,9 +1,9 @@
 {
   "name": "com.focus-creative-games.huatuo",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "displayName": "huatuo unity package",
   "description": "This package contains a collection of tools, used to huatuo.",
-  "unity": "2020.3.7",
+  "unity": "2020.3",
   "documentationUrl": "https://github.com/focus-creative-games/huatuo_upm",
   "keywords": [
     "huatuo",

@@ -6,18 +6,12 @@ using System.Text;
 using UnityEngine;
 using UnityEditor;
 
-// Logo.cs
-//
-// Author:
-//   ldr123 (ldr12@163.com)
-//
-
 namespace Huatuo.Editor
 {
     /// <summary>
     /// 这个类是Huatuo管理器中用到的LOGO图标
     /// </summary>
-    public class Logo
+    public class HTLogo
     {
         private static readonly string _logoBase64 =
             "iVBORw0KGgoAAAANSUhEUgAAAmwAAAC0CAYAAAApZ3BOAAAACXBIWXMAAAsTAAALEwEAmpwYAAA6xWlUWHRYTUw6Y29tLmFkb2JlLnh" +
@@ -746,7 +740,7 @@ namespace Huatuo.Editor
         ///[MenuItem("HuaTuo/LogoImageHelper")]
         private static void LogoImageHelper()
         {
-            var str = Logo._logoBase64;
+            var str = HTLogo._logoBase64;
             var sb = new StringBuilder();
             var len = str.Length;
             while (len > 0)

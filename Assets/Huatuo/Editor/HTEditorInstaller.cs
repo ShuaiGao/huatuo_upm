@@ -5,50 +5,33 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
-using Huatuo.Editor.ThirdPart;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Huatuo.Editor
 {
-    internal class Uninstaller
+    internal class HTEditorInstaller
     {
-        public static void DoUninstall()
-        {
-            string libil2cppPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string original = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_original_unity");
-            // backup libil2cpp
-            if (Directory.Exists(original))
-            {
-                Directory.Delete(libil2cppPath, true);
-                Directory.Move(original, libil2cppPath);
-            }
-            // 不存在原始备份目录
-            // TODO 这里考虑下是否帮用户下载libil2cpp
-        }
-    }
-
-    internal class Installer
-    {
-        private static Installer instance = null;
-        public static Installer Instance
+        private static HTEditorInstaller instance = null;
+        public static HTEditorInstaller Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new Installer();
+                    instance = new HTEditorInstaller();
                 }
                 return instance;
             }
         }
-        Installer() { }
+        HTEditorInstaller() 
+        {
+                }
         public void Init()
         {
-            if (File.Exists(Config.HuatuoVersionPath))
+            if (File.Exists(HTEditorConfig.HuatuoVersionPath))
             {
-                var data = File.ReadAllText(Config.HuatuoVersionPath, Encoding.UTF8);
+                var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
                 huatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);              
             }
             else
@@ -56,11 +39,30 @@ namespace Huatuo.Editor
                 huatuoVersion = default;
             }
 
-            PackageManager.Instance.SetCacheDirectory(huatuoVersion.CacheDir);
+            HTEditorCache.Instance.SetCacheDirectory(huatuoVersion.CacheDir);
+        }
+        public void DoUninstall()
+        {
+            string libil2cppPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
+            string original = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_original_unity");
+            // backup libil2cpp
+            if (Directory.Exists(original))
+            {
+                if(Directory.Exists(libil2cppPath))
+                {
+                    Directory.Delete(libil2cppPath, true);
+                }
+                Directory.Move(original, libil2cppPath);
+            }
+            version.huatuoTag = "";
+            version.il2cppTag = "";
+            SaveVersionLog();
+            // 不存在原始备份目录
+            // TODO 这里考虑下是否帮用户下载libil2cpp
         }
         public static void Enable(Action<string> callback)
         {
-            var mv1 = Utility.Mv(Config.LibIl2cppPath, Config.LibIl2cppBackPath);
+            var mv1 = HTEditorUtility.Mv(HTEditorConfig.LibIl2cppPath, HTEditorConfig.LibIl2cppBackPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -68,7 +70,7 @@ namespace Huatuo.Editor
                 return;
             }
 
-            mv1 = Utility.Mv(Config.HuatuoIL2CPPBackPath, Config.HuatuoIL2CPPPath);
+            mv1 = HTEditorUtility.Mv(HTEditorConfig.HuatuoIL2CPPBackPath, HTEditorConfig.HuatuoIL2CPPPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -81,7 +83,7 @@ namespace Huatuo.Editor
 
         public static void Disable(Action<string> callback)
         {
-            var mv1 = Utility.Mv(Config.HuatuoIL2CPPPath, Config.HuatuoIL2CPPBackPath);
+            var mv1 = HTEditorUtility.Mv(HTEditorConfig.HuatuoIL2CPPPath, HTEditorConfig.HuatuoIL2CPPBackPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -89,7 +91,7 @@ namespace Huatuo.Editor
                 return;
             }
 
-            mv1 = Utility.Mv(Config.LibIl2cppBackPath, Config.LibIl2cppPath);
+            mv1 = HTEditorUtility.Mv(HTEditorConfig.LibIl2cppBackPath, HTEditorConfig.LibIl2cppPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -110,9 +112,9 @@ namespace Huatuo.Editor
                     return;
                 }
 
-                if (Directory.Exists(Config.HuatuoIL2CPPBackPath))
+                if (Directory.Exists(HTEditorConfig.HuatuoIL2CPPBackPath))
                 {
-                    Directory.Delete(Config.HuatuoIL2CPPBackPath, true);
+                    Directory.Delete(HTEditorConfig.HuatuoIL2CPPBackPath, true);
                 }
 
                 callback?.Invoke(null);
@@ -183,10 +185,12 @@ namespace Huatuo.Editor
                 BackupLibil2cpp();
                 InstallIl2cpp();
                 InstallHuatuo();
+                SaveVersionLog();
+                DelBackupLibil2cpp();
             }
             catch (Exception ex)
             {
-                UnBackupLibil2cpp();
+                RevertInstall();
                 Debug.LogError("Install huatuo Error");
                 Debug.LogError(ex.Message);
             }
@@ -194,7 +198,6 @@ namespace Huatuo.Editor
             {
                 //ClearCache();
             }
-            SaveVersionLog();
 
             //var version = GetVersionData();
             //Debug.Log(version.Timestamp);
@@ -225,7 +228,24 @@ namespace Huatuo.Editor
             // TODO 检查libil2cpp, huatuo 版本，避免不必要的更新
             return true;
         }
-        public void UnBackupLibil2cpp()
+        public void RevertInstall()
+        {
+            version.huatuoTag = huatuoVersion.HuatuoTag;
+            version.il2cppTag = huatuoVersion.Il2cppTag;
+            if (!doBackup)
+            {
+                return;
+            }
+            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
+            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", backupFileName);
+            // backup libil2cpp
+            if (Directory.Exists(installPathBak))
+            {
+                Directory.Delete(installPath, true);
+                Directory.Move(installPathBak, installPath);
+            }
+        }
+        public void DelBackupLibil2cpp()
         {
             if (!doBackup)
             {
@@ -256,9 +276,11 @@ namespace Huatuo.Editor
             {
                 Directory.Move(installPath, original);
             }
-
-            doBackup = true;
-            Directory.Move(installPath, installPathBak);
+            if (Directory.Exists(installPath))
+            {
+                doBackup = true;
+                Directory.Move(installPath, installPathBak);
+            }
         }
         public void SaveVersionLog()
         {
@@ -271,23 +293,23 @@ namespace Huatuo.Editor
             huatuoVersion.HuatuoUrl = GetDownUrlWithTagHuatuo();
             huatuoVersion.InstallTime = DateTime.Now.ToString();
             huatuoVersion.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
-            Debug.Log($"Save huatuo install version, path: {Config.HuatuoVersionPath}");
-            File.WriteAllText(Config.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
+            Debug.Log($"Save huatuo install version, path: {HTEditorConfig.HuatuoVersionPath}");
+            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
         }
         public void SaveCacheDir()
         {
-            huatuoVersion.CacheDir = PackageManager.Instance.CacheBasePath;
-            File.WriteAllText(Config.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
+            huatuoVersion.CacheDir = HTEditorCache.Instance.CacheBasePath;
+            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
         }
         public static HuatuoRemoteConfig GetVersionData()
         {
-            var data = File.ReadAllText(Config.HuatuoVersionPath, Encoding.UTF8);
+            var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
             return JsonUtility.FromJson<HuatuoRemoteConfig>(data);
         }
         public void InstallHuatuo()
         {
             var zipFileName = $"huatuo-{version.huatuoTag}";
-            var zipPath = Path.Combine(PackageManager.Instance.CacheBasePath, $"{zipFileName}.zip");
+            var zipPath = Path.Combine(HTEditorCache.Instance.CacheBasePath, $"{zipFileName}.zip");
             if (!File.Exists(zipPath))
             {
                 var downloadUrl = GetDownUrlWithTagHuatuo();
@@ -307,7 +329,7 @@ namespace Huatuo.Editor
         public void InstallIl2cpp()
         {
             var zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
-            var zipPath = Path.Combine(PackageManager.Instance.CacheBasePath, $"{zipFileName}.zip");
+            var zipPath = Path.Combine(HTEditorCache.Instance.CacheBasePath, $"{zipFileName}.zip");
             if (!File.Exists(zipPath))
             {
                 var downloadUrl = GetDownUrlWithTagIl2cpp();
@@ -405,7 +427,7 @@ namespace Huatuo.Editor
                 Myrq.Abort();
                 return true;
             }
-            catch (System.Exception _)
+            catch
             {
                 throw;
             }

@@ -15,7 +15,7 @@ namespace Huatuo.Editor
     /// <summary>
     /// 这个类存放各种常量信息
     /// </summary>
-    public static class Config
+    public static class HTEditorConfig
     {
         public static string UnityFullVersion = "";
 

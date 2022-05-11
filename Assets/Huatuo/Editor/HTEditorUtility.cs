@@ -8,18 +8,13 @@ using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Utility.cs
-//
-// Author:
-//   ldr123 (ldr12@163.com)
-//
 
 namespace Huatuo.Editor
 {
     /// <summary>
     /// 这个类是Huatuo编辑器中使用到的各种小工具
     /// </summary>
-    public static class Utility
+    public static class HTEditorUtility
     {
         /// <summary>
         /// Compares two versions to see which is greater.
