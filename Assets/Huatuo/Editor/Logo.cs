@@ -775,6 +775,7 @@ namespace Huatuo.Editor
             ImgHeight = (int) (winSize.x / _logoImage.width * _logoImage.height);
             _rtImage = new Rect(0, 0, winSize.x, ImgHeight);
 
+            /*
             var files = AssetDatabase.FindAssets("t:shader");
             foreach (var file in files)
             {
@@ -785,6 +786,7 @@ namespace Huatuo.Editor
                     break;
                 }
             }
+            */
         }
 
         public void OnGUI()

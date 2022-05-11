@@ -46,9 +46,16 @@ namespace Huatuo.Editor
         Installer() { }
         public void Init()
         {
+            if (File.Exists(Config.HuatuoVersionPath))
+            {
+                var data = File.ReadAllText(Config.HuatuoVersionPath, Encoding.UTF8);
+                huatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);              
+            }
+            else
+            {
+                huatuoVersion = default;
+            }
 
-            var data = File.ReadAllText(Config.HuatuoVersionPath, Encoding.UTF8);
-            huatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);
             PackageManager.Instance.SetCacheDirectory(huatuoVersion.CacheDir);
         }
         public static void Enable(Action<string> callback)

@@ -496,11 +496,10 @@ namespace Huatuo.Editor
             }
 
             var installVersion = Installer.Instance.huatuoVersion;
-            if (installVersion.HuatuoTag.Length > 0)
+            if (!string.IsNullOrEmpty(installVersion.HuatuoTag) && installVersion.HuatuoTag.Length > 0)
             {
                 strMsg = $"Huatuo: {installVersion.HuatuoTag}\tIL2CPP: {installVersion.Il2cppTag}";
             }
-
 
             GUILayout.Space(8f);
             GUILayout.BeginHorizontal();
@@ -611,8 +610,7 @@ namespace Huatuo.Editor
             using var www = new UnityWebRequest(url)
 
             {
-                downloadHandler = new DownloadHandlerBuffer(),
-                timeout = 10, // seconds
+                downloadHandler = new DownloadHandlerBuffer()
             };
             yield return www.SendWebRequest();
 
