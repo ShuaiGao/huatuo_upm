@@ -7,7 +7,7 @@ huatuo_upm 是 unity中huatuo使用工具的集合，用来模拟手工安装hua
 
 # 安装
 
-支持最小unity版本 2020.3.7
+支持最小unity版本 2020.3
 
 多种安装方法如下
 
