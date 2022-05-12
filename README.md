@@ -66,5 +66,5 @@ todo
 
 卸载流程如下：
 
-	1. 检查是否存在原始文件夹备份。备份文件夹名示例 例：\...\\2020.3.33f1c2\Editor\Data\il2cpp\libil2cpp_original_unity
-	1. 移除libil2cpp，将libil2cpp_original_unity重命名为libil2cpp
+1. 检查是否存在原始文件夹备份。备份文件夹名示例 例：\...\\2020.3.33f1c2\Editor\Data\il2cpp\libil2cpp_original_unity
+2. 移除libil2cpp，将libil2cpp_original_unity重命名为libil2cpp
