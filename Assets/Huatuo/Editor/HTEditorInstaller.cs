@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -10,7 +11,7 @@ using UnityEngine;
 
 namespace Huatuo.Editor
 {
-    internal class HTEditorInstaller
+    internal class HTEditorInstaller 
     {
         private static HTEditorInstaller instance = null;
         public static HTEditorInstaller Instance
@@ -24,22 +25,22 @@ namespace Huatuo.Editor
                 return instance;
             }
         }
-        HTEditorInstaller() 
+        HTEditorInstaller()
         {
-                }
+        }
         public void Init()
         {
             if (File.Exists(HTEditorConfig.HuatuoVersionPath))
             {
                 var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
-                huatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);              
+                m_HuatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);
             }
             else
             {
-                huatuoVersion = default;
+                m_HuatuoVersion = default;
             }
 
-            HTEditorCache.Instance.SetCacheDirectory(huatuoVersion.CacheDir);
+            HTEditorCache.Instance.SetCacheDirectory(m_HuatuoVersion.CacheDir);
         }
         public void DoUninstall()
         {
@@ -48,14 +49,14 @@ namespace Huatuo.Editor
             // backup libil2cpp
             if (Directory.Exists(original))
             {
-                if(Directory.Exists(libil2cppPath))
+                if (Directory.Exists(libil2cppPath))
                 {
                     Directory.Delete(libil2cppPath, true);
                 }
                 Directory.Move(original, libil2cppPath);
             }
-            version.huatuoTag = "";
-            version.il2cppTag = "";
+            m_InstallVersion.huatuoTag = "";
+            m_InstallVersion.il2cppTag = "";
             SaveVersionLog();
             // 不存在原始备份目录
             // TODO 这里考虑下是否帮用户下载libil2cpp
@@ -121,123 +122,42 @@ namespace Huatuo.Editor
             });
         }
 
-        public InstallVersion version;
-        private bool useGithub;
-        private bool doBackup;
-        private string backupFileName;
-        private string libil2cppPrefix;
-        private string huatuoPrefix;
+        public InstallVersion m_InstallVersion; // 当前安装临时使用的版本数据
+        public HuatuoVersion m_HuatuoVersion; // 已安装的版本信息
 
-        private string libil2cppTagPrefix;
-        private string huatuoTagPrefix;
-        public HuatuoVersion huatuoVersion;
+        private bool m_bDoBackup;
+        private string m_sBackupFileName;
 
-        private string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
-        private string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
-        private string huatuoPrefixGitee = "https://gitee.com/focus-creative-games/huatuo/repository/archive";
-        private string huatuoPrefixGithub = "https://github.com/focus-creative-games//huatuo/archive/refs/heads";
-
-        private string libil2cppTagPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/tags";
-        private string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
-
-        private List<string> downloadList = new List<string>();
-
-        public void Install(bool github, InstallVersion installVersion)
+        public void Install(InstallVersion installVersion)
         {
-            this.version = installVersion;
-            useGithub = github;
-            libil2cppPrefix = github ? libil2cppPrefixGithub : libil2cppPrefixGitee;
-            huatuoPrefix = github ? huatuoPrefixGithub : huatuoPrefixGitee;
-
-            libil2cppTagPrefix = github ? libil2cppTagPrefixGithub : "";
-            huatuoTagPrefix = github ? huatuoTagPrefixGithub : "";
-            Install();
-        }
-        public static string PathIl2cpp
-        {
-            get
-            {
-                string str7 = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
-                return Path.Combine(str7, "Data", "il2cpp");
-            }
-        }
-        public string GetDownUrlWithTagIl2cpp()
-        {
-            return @$"{libil2cppTagPrefix}/{version.il2cppTag}.zip";
-        }
-        public string GetDownUrlWithTagHuatuo()
-        {
-            return @$"{huatuoTagPrefix}/{version.huatuoTag}.zip";
-        }
-        public static bool CheckIl2cpp()
-        {
-            return Directory.Exists(PathIl2cpp);
-        }
-        private void Install()
-        {
-            // 安装过程，不需要对比版本，有时候需要覆盖安装的
-            if (!CheckSupport())
-            {
-                return;
-            }
+            this.m_InstallVersion = installVersion;
             try
             {
                 BackupLibil2cpp();
-                InstallIl2cpp();
-                InstallHuatuo();
+                Extract();
                 SaveVersionLog();
                 DelBackupLibil2cpp();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                EditorUtility.DisplayDialog("警告", "权限不足!!!\n请关闭libil2cpp目录及打开的内部文件，然后重试", "ok");
             }
             catch (Exception ex)
             {
                 RevertInstall();
-                Debug.LogError("Install huatuo Error");
-                Debug.LogError(ex.Message);
+                Debug.LogError($"Install huatuo Error: {ex.Message}");
             }
-            finally
-            {
-                //ClearCache();
-            }
-
-            //var version = GetVersionData();
-            //Debug.Log(version.Timestamp);
-            //Debug.Log(version.InstallTime);
-        }
-        private void ClearCache()
-        {
-            foreach (string item in downloadList)
-            {
-                File.Delete(item);
-            }
-        }
-        private bool CheckSupport()
-        {
-            // TODO 做gitee测试，并支持gitee
-            if (!useGithub)
-            {
-                //Debug.LogError("Not Support gitee， Please use github!!!");
-                EditorUtility.DisplayDialog("错误", "当前不支持gitee, 请使用github!", "ok");
-                return false;
-            }
-            // TODO unity版本判断
-            //if (!versionSet.Contains(InternalEditorUtility.GetUnityVersionDigits()))
-            //{
-            //    Debug.LogError($"Not Support unity version{Application.unityVersion}");
-            //    return false;
-            //}
-            // TODO 检查libil2cpp, huatuo 版本，避免不必要的更新
-            return true;
         }
         public void RevertInstall()
         {
-            version.huatuoTag = huatuoVersion.HuatuoTag;
-            version.il2cppTag = huatuoVersion.Il2cppTag;
-            if (!doBackup)
+            m_InstallVersion.huatuoTag = m_HuatuoVersion.HuatuoTag;
+            m_InstallVersion.il2cppTag = m_HuatuoVersion.Il2cppTag;
+            if (!m_bDoBackup)
             {
                 return;
             }
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", backupFileName);
+            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
             // backup libil2cpp
             if (Directory.Exists(installPathBak))
             {
@@ -247,12 +167,12 @@ namespace Huatuo.Editor
         }
         public void DelBackupLibil2cpp()
         {
-            if (!doBackup)
+            if (!m_bDoBackup)
             {
                 return;
             }
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", backupFileName);
+            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
             // backup libil2cpp
             if (Directory.Exists(installPathBak))
             {
@@ -262,9 +182,9 @@ namespace Huatuo.Editor
         public void BackupLibil2cpp()
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            backupFileName = $"libil2cpp_{ts.TotalSeconds}";
+            m_sBackupFileName = $"libil2cpp_{ts.TotalSeconds}";
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", backupFileName);
+            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
             string original = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_original_unity");
 
             if (!Directory.Exists(installPath))
@@ -278,7 +198,7 @@ namespace Huatuo.Editor
             }
             if (Directory.Exists(installPath))
             {
-                doBackup = true;
+                m_bDoBackup = true;
                 Directory.Move(installPath, installPathBak);
             }
         }
@@ -287,63 +207,38 @@ namespace Huatuo.Editor
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
 
             // TODO 记录libil2cpp 和 huatuo 版本信息
-            huatuoVersion.HuatuoTag = version.huatuoTag;
-            huatuoVersion.Il2cppTag = version.il2cppTag;
-            huatuoVersion.Il2cppUrl = GetDownUrlWithTagIl2cpp();
-            huatuoVersion.HuatuoUrl = GetDownUrlWithTagHuatuo();
-            huatuoVersion.InstallTime = DateTime.Now.ToString();
-            huatuoVersion.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
+            m_HuatuoVersion.HuatuoTag = m_InstallVersion.huatuoTag;
+            m_HuatuoVersion.Il2cppTag = m_InstallVersion.il2cppTag;
+            m_HuatuoVersion.Il2cppUrl = HTEditorCache.Instance.GetDownUrlWithTagIl2cpp(m_InstallVersion.il2cppTag);
+            m_HuatuoVersion.HuatuoUrl = HTEditorCache.Instance.GetDownUrlWithTagHuatuo(m_InstallVersion.huatuoTag);
+            m_HuatuoVersion.InstallTime = DateTime.Now.ToString();
+            m_HuatuoVersion.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
             Debug.Log($"Save huatuo install version, path: {HTEditorConfig.HuatuoVersionPath}");
-            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
+            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(m_HuatuoVersion, true), Encoding.UTF8);
         }
         public void SaveCacheDir()
         {
-            huatuoVersion.CacheDir = HTEditorCache.Instance.CacheBasePath;
-            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(huatuoVersion, true), Encoding.UTF8);
+            m_HuatuoVersion.CacheDir = HTEditorCache.Instance.CacheBasePath;
+            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(m_HuatuoVersion, true), Encoding.UTF8);
         }
         public static HuatuoRemoteConfig GetVersionData()
         {
             var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
             return JsonUtility.FromJson<HuatuoRemoteConfig>(data);
         }
-        public void InstallHuatuo()
+        public void Extract()
         {
-            var zipFileName = $"huatuo-{version.huatuoTag}";
-            var zipPath = Path.Combine(HTEditorCache.Instance.CacheBasePath, $"{zipFileName}.zip");
-            if (!File.Exists(zipPath))
-            {
-                var downloadUrl = GetDownUrlWithTagHuatuo();
-                Debug.Log($"Download url: {downloadUrl}");
-                Debug.Log($"Download {zipFileName} path {zipPath}");
-                DownloadFile(downloadUrl, zipPath);
-            }
-            else
-            {
-                Debug.Log($"Download {zipFileName}, use cache file: {zipPath}");
-            }
-
-            var extractDir = @$"{zipFileName}/huatuo";
-            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp", "huatuo");
-            Extract(zipPath, extractDir, installPath);
-        }
-        public void InstallIl2cpp()
-        {
-            var zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
-            var zipPath = Path.Combine(HTEditorCache.Instance.CacheBasePath, $"{zipFileName}.zip");
-            if (!File.Exists(zipPath))
-            {
-                var downloadUrl = GetDownUrlWithTagIl2cpp();
-                Debug.Log($"Download il2cpp_huatuo url: {downloadUrl}");
-                Debug.Log($"Download {zipFileName} path {zipPath}");
-                DownloadFile(downloadUrl, zipPath);
-            }
-            else
-            {
-                Debug.Log($"Download {zipFileName}, use cache file: {zipPath}");
-            }
-
-            var extractDir = @$"{zipFileName}/libil2cpp";
+            var DirName = $"il2cpp_huatuo-{m_InstallVersion.il2cppTag}";
+            var zipPath = HTEditorCache.Instance.GetZipPath(EFILE_NAME.IL2CPP, m_InstallVersion.il2cppTag);
+            var extractDir = @$"{DirName}/libil2cpp";
             string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
+            Extract(zipPath, extractDir, installPath);
+
+
+            DirName = $"huatuo-{m_InstallVersion.huatuoTag}";
+            zipPath = HTEditorCache.Instance.GetZipPath(EFILE_NAME.HUATUO, m_InstallVersion.huatuoTag);
+            extractDir = @$"{DirName}/huatuo";
+            installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp", "huatuo");
             Extract(zipPath, extractDir, installPath);
         }
 
@@ -352,7 +247,6 @@ namespace Huatuo.Editor
             var result = ExtractZip(zipPath, extractDir, installPath);
             return result.Count > 0;
         }
-
 
         public static List<string> ExtractZip(string zipFilePath, string relativePath, string destPath)
         {
@@ -403,34 +297,6 @@ namespace Huatuo.Editor
                 }
             }
             return result;
-        }
-
-        public bool DownloadFile(string URL, string filename)
-        {
-            downloadList.Add(filename);
-            try
-            {
-                HttpWebRequest Myrq = (HttpWebRequest)HttpWebRequest.Create(URL);
-                HttpWebResponse myrp = (HttpWebResponse)Myrq.GetResponse();
-                Stream st = myrp.GetResponseStream();
-                Stream so = new FileStream(filename, FileMode.Create);
-                byte[] by = new byte[1024];
-                int osize = st.Read(by, 0, (int)by.Length);
-                while (osize > 0)
-                {
-                    so.Write(by, 0, osize);
-                    osize = st.Read(by, 0, (int)by.Length);
-                }
-                so.Close();
-                st.Close();
-                myrp.Close();
-                Myrq.Abort();
-                return true;
-            }
-            catch
-            {
-                throw;
-            }
         }
     }
 
