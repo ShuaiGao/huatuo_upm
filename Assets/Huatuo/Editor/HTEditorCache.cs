@@ -16,6 +16,7 @@ namespace Huatuo.Editor
         HUATUO,
         IL2CPP
     }
+
     internal class HTEditorCache
     {
         private string libil2cppTagPrefix;
@@ -33,6 +34,7 @@ namespace Huatuo.Editor
         private string libil2cppTagPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/tags";
         private string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
         private static HTEditorCache instance = null;
+
         public static HTEditorCache Instance
         {
             get
@@ -41,9 +43,11 @@ namespace Huatuo.Editor
                 {
                     instance = new HTEditorCache();
                 }
+
                 return instance;
             }
         }
+
         private static string CacheDirName = ".huatuo_cache";
         public string CacheBasePath;
 
@@ -52,6 +56,7 @@ namespace Huatuo.Editor
             libil2cppTagPrefix = libil2cppTagPrefixGithub;
             huatuoTagPrefix = huatuoTagPrefixGithub;
         }
+
         public void SetDownloadCount(int count)
         {
             m_nDownloadTotal = count;
@@ -59,14 +64,17 @@ namespace Huatuo.Editor
             m_nSuccessCount = 0;
             m_nFailedCount = 0;
         }
+
         public bool DownloadDone()
         {
             return m_nDownloadTotal == m_nFailedCount + m_nSuccessCount;
         }
+
         public bool DownloadSuccess()
         {
             return m_nDownloadTotal == m_nSuccessCount;
         }
+
         public void SetCacheDirectory(string path)
         {
             if (path == null || path.Length == 0)
@@ -77,6 +85,7 @@ namespace Huatuo.Editor
             {
                 CacheBasePath = path;
             }
+
             Directory.CreateDirectory(CacheBasePath);
             HTEditorInstaller.Instance.SaveCacheDir();
         }
@@ -85,10 +94,12 @@ namespace Huatuo.Editor
         {
             return @$"{huatuoTagPrefix}/{tag}.zip";
         }
+
         public string GetDownUrlWithTagIl2cpp(string tag)
         {
             return @$"{libil2cppTagPrefix}/{tag}.zip";
         }
+
         public string GetZipPath(EFILE_NAME nameType, string tag)
         {
             var zipFileName = "";
@@ -103,8 +114,10 @@ namespace Huatuo.Editor
                 default:
                     throw new Exception($"no support file type{nameof(nameType)}");
             }
+
             return Path.Combine(CacheBasePath, $"{zipFileName}.zip");
         }
+
         public IEnumerator GetCache(EFILE_NAME nameType, string tag, string hashCode)
         {
             m_counter++;
@@ -123,6 +136,7 @@ namespace Huatuo.Editor
                 default:
                     throw new Exception($"no support file type{nameof(nameType)}");
             }
+
             var downloadErr = false;
             var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
             if (File.Exists(zipPath))
@@ -133,20 +147,17 @@ namespace Huatuo.Editor
             }
             else
             {
-
                 var itor = HTEditorUtility.DownloadFile(downloadUrl, zipPath,
-                            p =>
-                            {
-                                //EditorUtility.DisplayProgressBar("下载中...", $"{m_counter}/{m_nDownloadTotal}", p);
-                            },
-                            ret =>
-                            {
-                                if (!string.IsNullOrEmpty(ret))
-                                {
-                                    downloadErr = true;
-                                    EditorUtility.DisplayDialog("错误", $"下载{zipFileName}出错.\n{ret}", "ok");
-                                }
-                            }, false);
+                    p => { EditorUtility.DisplayProgressBar("下载中...", $"{m_counter}/{m_nDownloadTotal}", p); },
+                    ret =>
+                    {
+                        if (!string.IsNullOrEmpty(ret))
+                        {
+                            downloadErr = true;
+                            EditorUtility.DisplayDialog("错误", $"下载{zipFileName}出错.\n{ret}", "ok");
+                        }
+                        EditorUtility.ClearProgressBar();
+                    }, false);
                 while (itor.MoveNext())
                 {
                     yield return itor.Current;
@@ -157,6 +168,7 @@ namespace Huatuo.Editor
                     EditorUtility.DisplayDialog("错误", $"下载的文件{zipPath}不存在", "ok");
                     downloadErr = false;
                 }
+
                 //else if (MD5.ComputeFileMD5(zipPath).ToLower() != hashCode)
                 //{
                 //    EditorUtility.DisplayDialog("错误", $"下载的文件{zipPath} hash不匹配，请重新下载", "ok");

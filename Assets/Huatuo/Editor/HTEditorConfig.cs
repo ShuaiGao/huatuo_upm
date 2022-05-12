@@ -38,7 +38,7 @@ namespace Huatuo.Editor
         public static readonly string HuatuoIL2CPPBackPath = EditorBasePath + "/il2cpp/libil2cpp_huatuo";
         public static readonly string HuatuoBackPath = HuatuoIL2CPPBackPath + "/huatuo";
         public static readonly string LibIl2cppPath = EditorBasePath + "/il2cpp/libil2cpp";
-        public static readonly string Il2cppPath = Path.Combine(EditorBasePath, "/il2cpp");
+        public static readonly string Il2cppPath = EditorBasePath + "/il2cpp";
         public static readonly string LibIl2cppBackPath = EditorBasePath + "/il2cpp/libil2cpp_back";
 
         public static string DownloadCache = "";

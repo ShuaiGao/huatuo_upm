@@ -161,7 +161,7 @@ namespace Huatuo.Editor
 
             if (!bValidateCertificate)
             {
-                www.certificateHandler = new IgnoreHttps();
+              //  www.certificateHandler = new IgnoreHttps();
             }
 
             progress?.Invoke(0f);

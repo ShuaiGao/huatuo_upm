@@ -95,6 +95,8 @@ namespace Huatuo.Editor
             {
                 return;
             }
+            
+            EditorUtility.ClearProgressBar();
 
             HTEditorConfig.Init();
 
@@ -195,6 +197,7 @@ namespace Huatuo.Editor
             }
             m_corUpgrade = this.StartCoroutine(Install(version));
         }
+
         private IEnumerator Install(InstallVersion version)
         {
             HTEditorCache.Instance.SetDownloadCount(2);
@@ -209,18 +212,21 @@ namespace Huatuo.Editor
             {
                 yield return itor.Current;
             }
+
             if (!HTEditorCache.Instance.DownloadSuccess())
             {
+                EditorUtility.DisplayDialog("错误", "下载失败!", "ok");
                 Debug.Log("下载失败");
                 yield return null;
             }
             else
             {
-                HTEditorInstaller.Instance.Install(version);
+                 HTEditorInstaller.Instance.Install(version);
             }
+
+            ReloadVersion();
             m_corUpgrade = null;
         }
-
 
         private IEnumerator Upgrading()
         {
@@ -388,6 +394,19 @@ namespace Huatuo.Editor
             GUILayout.Label($"<color=white>Unity3D:\t{HTEditorConfig.UnityFullVersion}</color>", m_styleNormalFont);
             GUILayout.EndHorizontal();
 
+            if (m_bVersionUnsported)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"<color=red>你的Unity版本不被支持，请使用受支持的版本!</color>", m_styleWarningFont);
+                if (GUILayout.Button("查看受支持的版本", m_styleNormalBtn))
+                {
+                    Application.OpenURL(HTEditorConfig.SupportedVersion);
+                }
+
+                GUILayout.EndHorizontal();
+                return;
+            }
+            
             if (!m_bHasIl2cpp)
             {
                 GUILayout.Label("<color=red>Build Support(IL2CPP) 未安装！</color>", m_styleWarningFont);
@@ -412,20 +431,6 @@ namespace Huatuo.Editor
                 HTEditorCache.Instance.SetCacheDirectory(cachePath);
             }
             GUILayout.EndHorizontal();
-
-            if (m_bVersionUnsported)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"<color=red>你的Unity版本不被支持，请使用受支持的版本!</color>", m_styleWarningFont);
-                if (GUILayout.Button("查看受支持的版本", m_styleNormalBtn))
-                {
-                    Application.OpenURL(HTEditorConfig.SupportedVersion);
-                }
-
-                GUILayout.EndHorizontal();
-                return;
-            }
-
 
             var strMsg = "";
             var strColor = "<color=green>";
@@ -669,14 +674,15 @@ namespace Huatuo.Editor
                 GUILayout.Space(m_logo.ImgHeight + 8);
             }
 
+            EditorGUI.BeginDisabledGroup(busying);
+
             InstallOrUpgradeGui();
 
             GUILayout.Space(120);
 
-            EditorGUI.EndDisabledGroup();
-            EditorGUI.BeginDisabledGroup(busying);
-
             FooterGui();
+
+            EditorGUI.EndDisabledGroup();
         }
     }
 }
