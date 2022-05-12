@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -44,16 +42,14 @@ namespace Huatuo.Editor
         }
         public void DoUninstall()
         {
-            string libil2cppPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string original = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_original_unity");
             // backup libil2cpp
-            if (Directory.Exists(original))
+            if (Directory.Exists(HTEditorConfig.Libil2cppOritinalPath))
             {
-                if (Directory.Exists(libil2cppPath))
+                if (Directory.Exists(HTEditorConfig.Libil2cppPath))
                 {
-                    Directory.Delete(libil2cppPath, true);
+                    Directory.Delete(HTEditorConfig.Libil2cppPath, true);
                 }
-                Directory.Move(original, libil2cppPath);
+                Directory.Move(HTEditorConfig.Libil2cppOritinalPath, HTEditorConfig.Libil2cppPath);
             }
             m_InstallVersion.huatuoTag = "";
             m_InstallVersion.il2cppTag = "";
@@ -63,7 +59,7 @@ namespace Huatuo.Editor
         }
         public static void Enable(Action<string> callback)
         {
-            var mv1 = HTEditorUtility.Mv(HTEditorConfig.LibIl2cppPath, HTEditorConfig.LibIl2cppBackPath);
+            var mv1 = HTEditorUtility.Mv(HTEditorConfig.Libil2cppPath, HTEditorConfig.Libil2cppOritinalPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -92,7 +88,7 @@ namespace Huatuo.Editor
                 return;
             }
 
-            mv1 = HTEditorUtility.Mv(HTEditorConfig.LibIl2cppBackPath, HTEditorConfig.LibIl2cppPath);
+            mv1 = HTEditorUtility.Mv(HTEditorConfig.Libil2cppOritinalPath, HTEditorConfig.Libil2cppPath);
             if (!string.IsNullOrEmpty(mv1))
             {
                 Debug.LogError(mv1);
@@ -156,13 +152,12 @@ namespace Huatuo.Editor
             {
                 return;
             }
-            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
+            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
             // backup libil2cpp
             if (Directory.Exists(installPathBak))
             {
-                Directory.Delete(installPath, true);
-                Directory.Move(installPathBak, installPath);
+                Directory.Delete(HTEditorConfig.Libil2cppPath, true);
+                Directory.Move(installPathBak, HTEditorConfig.Libil2cppPath);
             }
         }
         public void DelBackupLibil2cpp()
@@ -171,8 +166,7 @@ namespace Huatuo.Editor
             {
                 return;
             }
-            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
+            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
             // backup libil2cpp
             if (Directory.Exists(installPathBak))
             {
@@ -183,23 +177,22 @@ namespace Huatuo.Editor
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             m_sBackupFileName = $"libil2cpp_{ts.TotalSeconds}";
-            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            string installPathBak = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", m_sBackupFileName);
-            string original = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp_original_unity");
+            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
+            string original = Path.Combine(HTEditorConfig.Il2cppPath, "libil2cpp_original_unity");
 
-            if (!Directory.Exists(installPath))
+            if (!Directory.Exists(HTEditorConfig.Libil2cppPath))
             {
                 return;
             }
             // backup libil2cpp original
             if (!Directory.Exists(original))
             {
-                Directory.Move(installPath, original);
+                Directory.Move(HTEditorConfig.Libil2cppPath, original);
             }
-            if (Directory.Exists(installPath))
+            if (Directory.Exists(HTEditorConfig.Libil2cppPath))
             {
                 m_bDoBackup = true;
-                Directory.Move(installPath, installPathBak);
+                Directory.Move(HTEditorConfig.Libil2cppPath, installPathBak);
             }
         }
         public void SaveVersionLog()
@@ -231,14 +224,13 @@ namespace Huatuo.Editor
             var DirName = $"il2cpp_huatuo-{m_InstallVersion.il2cppTag}";
             var zipPath = HTEditorCache.Instance.GetZipPath(EFILE_NAME.IL2CPP, m_InstallVersion.il2cppTag);
             var extractDir = @$"{DirName}/libil2cpp";
-            string installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp");
-            Extract(zipPath, extractDir, installPath);
+            Extract(zipPath, extractDir, HTEditorConfig.Libil2cppPath);
 
 
             DirName = $"huatuo-{m_InstallVersion.huatuoTag}";
             zipPath = HTEditorCache.Instance.GetZipPath(EFILE_NAME.HUATUO, m_InstallVersion.huatuoTag);
             extractDir = @$"{DirName}/huatuo";
-            installPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Data", "il2cpp", "libil2cpp", "huatuo");
+            var installPath = Path.Combine(HTEditorConfig.Libil2cppPath, "huatuo");
             Extract(zipPath, extractDir, installPath);
         }
 

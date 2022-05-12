@@ -4,11 +4,6 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-// Config.cs
-//
-// Author:
-//   ldr123 (ldr12@163.com)
-//
 
 namespace Huatuo.Editor
 {
@@ -19,9 +14,12 @@ namespace Huatuo.Editor
     {
         public static string UnityFullVersion = "";
 
-        public static string IL2CPPManifestUrl = "";
-        private static string ManifestBaseURL = "https://ldr123.github.io/release";
-        public static string HuatuoManifestUrl = ManifestBaseURL + "/huatuo";
+        //public static readonly string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
+        //public static readonly string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
+        //public static readonly string huatuoPrefixGitee = "https://gitee.com/focus-creative-games/huatuo/repository/archive";
+        //public static readonly string huatuoPrefixGithub = "https://github.com/focus-creative-games//huatuo/archive/refs/heads";
+        public static readonly string libil2cppTagPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/tags";
+        public static readonly string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
 
         private static readonly string baseDomain = "https://focus-creative-games.github.io/focus-creative-games";
         public static readonly string urlVersionConfig = $"{baseDomain}/version.json";
@@ -34,19 +32,16 @@ namespace Huatuo.Editor
 
         private static readonly string EditorBasePath = EditorApplication.applicationContentsPath;
         public static readonly string HuatuoIL2CPPPath = EditorBasePath + "/il2cpp/libil2cpp";
-        public static readonly string HuatuoPath = HuatuoIL2CPPPath + "/huatuo";
         public static readonly string HuatuoIL2CPPBackPath = EditorBasePath + "/il2cpp/libil2cpp_huatuo";
-        public static readonly string HuatuoBackPath = HuatuoIL2CPPBackPath + "/huatuo";
-        public static readonly string LibIl2cppPath = EditorBasePath + "/il2cpp/libil2cpp";
-        public static readonly string Il2cppPath = EditorBasePath + "/il2cpp";
-        public static readonly string LibIl2cppBackPath = EditorBasePath + "/il2cpp/libil2cpp_back";
+        public static readonly string Il2cppPath = Path.Combine(EditorBasePath, "il2cpp");
+        public static readonly string Libil2cppPath = Path.Combine(Il2cppPath, "libil2cpp");
+        public static readonly string Libil2cppOritinalPath = Path.Combine(Il2cppPath, "libil2cpp_original_unity");
+        public static readonly string HuatuoPath = Path.Combine(Il2cppPath, "huatuo");
 
         public static string DownloadCache = "";
         public static string HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
         public static void Init()
         {
-            IL2CPPManifestUrl = ManifestBaseURL + "/" + InternalEditorUtility.GetUnityVersionDigits();
-            DownloadCache = Application.temporaryCachePath;
             UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
         }
     }

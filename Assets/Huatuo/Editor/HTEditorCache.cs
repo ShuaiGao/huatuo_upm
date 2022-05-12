@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
-using Huatuo.Editor.ThirdPart;
 using UnityEngine;
 
 namespace Huatuo.Editor
@@ -26,13 +21,6 @@ namespace Huatuo.Editor
         private int m_nSuccessCount;
         private int m_nFailedCount;
 
-        //private string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
-        //private string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
-        //private string huatuoPrefixGitee = "https://gitee.com/focus-creative-games/huatuo/repository/archive";
-        //private string huatuoPrefixGithub = "https://github.com/focus-creative-games//huatuo/archive/refs/heads";
-
-        private string libil2cppTagPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/tags";
-        private string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
         private static HTEditorCache instance = null;
 
         public static HTEditorCache Instance
@@ -53,8 +41,8 @@ namespace Huatuo.Editor
 
         HTEditorCache()
         {
-            libil2cppTagPrefix = libil2cppTagPrefixGithub;
-            huatuoTagPrefix = huatuoTagPrefixGithub;
+            libil2cppTagPrefix = HTEditorConfig.libil2cppTagPrefixGithub;
+            huatuoTagPrefix = HTEditorConfig.huatuoTagPrefixGithub;
         }
 
         public void SetDownloadCount(int count)

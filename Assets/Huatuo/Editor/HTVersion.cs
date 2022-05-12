@@ -10,8 +10,6 @@ namespace Huatuo.Editor
     {
         public string HuatuoTag;
         public string Il2cppTag;
-        public string ver;
-        public string commitid;
         public string Il2cppUrl;
         public string HuatuoUrl;
         public string InstallTime;
@@ -23,6 +21,20 @@ namespace Huatuo.Editor
         public string il2cppTag;
         public string huatuoTag;
     }
+    [Serializable]
+    internal struct RemoteConfig
+    {
+        public List<string> unity_version;
+        public List<string> huatuo_version;
+        public List<string> il2cpp_version;
+        public List<string> il2cpp_min_version;
+        public List<string> huatuo_deprecated_version;
+        public List<string> il2cpp_deprecated_version;
+        public List<string> il2cpp_recommend_version;
+        public string huatuo_recommend_version;
+        public string huatuo_min_version;
+    }
+
     /// <summary>
     /// 这个类提供了Huatuo和IL2CPP相关的版本信息
     /// </summary>
@@ -34,51 +46,77 @@ namespace Huatuo.Editor
         public List<string> unity_version;
         public List<string> huatuo_version;
         public List<string> il2cpp_version;
-        public List<string> il2cpp_min_version;
-        public List<string> huatuo_deprecated_version;
-        public List<string> il2cpp_deprecated_version;
-        public List<string> il2cpp_recommend_version;
+        public string il2cpp_recommend_version;
         public string huatuo_recommend_version;
         public string huatuo_min_version;
-        private string use_huatuo_version;
-        private string use_il2cpp_version;
-
-        public List<string> GetIl2cppVersion()
+        public HuatuoRemoteConfig(RemoteConfig rc)
         {
-            var ret =new List<string>();
-            if(il2cpp_version == null)
+            unity_version = rc.unity_version;
+            huatuo_recommend_version = rc.huatuo_recommend_version;
+            InitHuatuoVersion(rc);
+            InitIl2cppVersion(rc);
+            InitIl2cppRecommendVersion(rc);
+        }
+        private bool BigThanMinVersion(string version, string min_version)
+        {
+            var a = version.Split('.');
+            var min = min_version.Split('.');
+            for (int i = 0; i < a.Length && i < min.Length; i++)
             {
-                return ret;
-            }
-            foreach(string version in il2cpp_version)
-            {
-                if(version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                var nA = Convert.ToInt32(a[i]);
+                var nMin = Convert.ToInt32(min[i]);
+                if (nMin > nA)
                 {
-                    ret.Add(version);
+                    return false;
                 }
             }
-            return ret;
+            return true;
         }
-        public string GetIl2cppRecommendVersion()
+        private void InitHuatuoVersion(RemoteConfig rc)
         {
-            foreach (string version in il2cpp_recommend_version)
+            var ret = new List<string>();
+            if (rc.huatuo_version != null)
             {
-                if(version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                foreach (var item in rc.huatuo_version)
                 {
-                    return version;
+                    if (rc.huatuo_deprecated_version.Contains(item))
+                    {
+                        continue;
+                    }
+                    if (!BigThanMinVersion(item, rc.huatuo_min_version))
+                    {
+                        continue;
+                    }
+                    ret.Add(item);
                 }
             }
-            return null;
+            huatuo_version = ret;
         }
-
-        public HuatuoRemoteConfig(HuatuoRemoteConfig from)
+        private void InitIl2cppVersion(RemoteConfig rc)
         {
-            if (from == null)
+            var ret = new List<string>();
+            if (rc.il2cpp_version != null)
             {
-                return;
+                foreach (string version in rc.il2cpp_version)
+                {
+                    if (version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                    {
+                        ret.Add(version);
+                    }
+                }
             }
-
-            ver = from.ver;
+            il2cpp_version = ret;
+        }
+        private void InitIl2cppRecommendVersion(RemoteConfig rc)
+        {
+            foreach (string version in rc.il2cpp_recommend_version)
+            {
+                if (version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                {
+                    il2cpp_recommend_version = version;
+                    break;
+                }
+            }
         }
 
         /// <summary>
