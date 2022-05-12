@@ -16,8 +16,7 @@ namespace Huatuo.Editor
     /// </summary>
     public class HTEditorManger : EditorWindow
     {
-        private static readonly Vector2 minSize = new Vector2(620f, 450);
-        private static readonly Vector2 mnaxSize = new Vector2(620f, 450);
+        private static readonly Vector2 m_vecMinSize = new Vector2(620f, 450);
 
         private bool m_bInitialized = false;
 
@@ -51,11 +50,17 @@ namespace Huatuo.Editor
 
         private bool m_bVersionUnsported = false;
         private bool m_bShowOtherVersion = false;
+        
+        //选择安装其他版本时，缓存下拉框值
+        private int m_nOldhuatuoVersionIndex = 0;
+        private int m_nOldil2cppVersionIndex = 0;
 
         private bool busying => m_corUpgrade != null || m_corFetchManifest != null;
 
         private void OnEnable()
         {
+            minSize = maxSize = m_vecMinSize;
+
             Init();
         }
 
@@ -149,7 +154,7 @@ namespace Huatuo.Editor
             HTEditorConfig.Init();
 
             m_logo = new HTLogo();
-            m_logo.Init(minSize);
+            m_logo.Init(m_vecMinSize);
 
             ReloadVersion();
 
@@ -568,19 +573,17 @@ namespace Huatuo.Editor
             }
             if (m_bShowOtherVersion)
             {
-                GUILayout.BeginArea(new Rect(100, 320, 300, 400));
+                GUILayout.BeginArea(new Rect(100, 280, 300, 400));
                 GUILayout.BeginVertical();
                 //一个选择框，每个选择框里表示一个Int数
                 var selectValue = new List<int>();
-                var huatuoVersionIndex = 0;
-                var il2cppVersionIndex = 0;
                 for (int i = 0; i < m_remoteConfig.huatuo_version.Count || i < m_remoteConfig.il2cpp_version.Count; i++)
                 {
                     selectValue.Add(i);
                 }
                 var il2cppVersion = m_remoteConfig.GetIl2cppVersion();
-                huatuoVersionIndex = EditorGUILayout.Popup("huatuo:", huatuoVersionIndex, m_remoteConfig.huatuo_version.ToArray());
-                il2cppVersionIndex = EditorGUILayout.Popup("IL2CPP: ", il2cppVersionIndex, il2cppVersion.ToArray());
+                m_nOldhuatuoVersionIndex = EditorGUILayout.Popup("huatuo:", m_nOldhuatuoVersionIndex, m_remoteConfig.huatuo_version.ToArray());
+                m_nOldil2cppVersionIndex = EditorGUILayout.Popup("IL2CPP: ", m_nOldil2cppVersionIndex, il2cppVersion.ToArray());
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("取消", m_styleNormalBtn))
                 {
@@ -590,8 +593,8 @@ namespace Huatuo.Editor
                 {
                     var version = new InstallVersion()
                     {
-                        huatuoTag=m_remoteConfig.huatuo_version[huatuoVersionIndex],
-                        il2cppTag = il2cppVersion[il2cppVersionIndex]
+                        huatuoTag=m_remoteConfig.huatuo_version[m_nOldhuatuoVersionIndex],
+                        il2cppTag = il2cppVersion[m_nOldil2cppVersionIndex]
                     };
                     HTEditorInstaller.Instance.Install(true, version);
                     m_bShowOtherVersion = false;
@@ -806,7 +809,7 @@ namespace Huatuo.Editor
             {
                 m_logo.OnGUI();
 
-                GUILayout.Space(m_logo.ImgHeight + 16f);
+                GUILayout.Space(m_logo.ImgHeight + 8);
             }
 
             EditorGUI.BeginDisabledGroup(busying);
