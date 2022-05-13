@@ -1,0 +1,31 @@
+{
+  "unity_version": [
+    "2020.3.7",
+    "2020.3.9",
+    "2020.3.33",
+    "2021.3.1"
+  ],
+  "huatuo_deprecated_version": [ "0.0.2" ],
+  "il2cpp_deprecated_version": [
+  ],
+  "huatuo_version": [
+    "0.0.1",
+    "0.0.2",
+    "0.0.3",
+    "0.0.4"
+  ],
+  "il2cpp_version": [
+    "2020.3.33-0.0.1",
+    "2021.3.1-0.0.1"
+  ],
+  "il2cpp_min_version": [
+    "2020.3.33-0.0.1",
+    "2021.3.1-0.0.1"
+  ],
+  "huatuo_min_version": "0.0.1",
+  "huatuo_recommend_version": "0.0.4",
+  "il2cpp_recommend_version": [
+    "2020.3.33-0.0.1",
+    "2021.3.1-0.0.1"
+  ]
+}
