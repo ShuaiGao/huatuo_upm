@@ -9,9 +9,9 @@ huatuo_upm 是 unity中huatuo使用工具的集合，用来模拟手工安装hua
 
 支持最小unity版本 2020.3
 
-多种安装方法如下
+多种安装方法如下，或参照海浪哥哥的[手把手教你使用Huatuo部署插件](https://zhuanlan.zhihu.com/p/513834841)
 
-### 方法1： 使用OpenUPM的Unity依赖文件（推荐方式）
+### 方法1： 使用OpenUPM的Unity依赖文件
 
 1. 打开unity工程的根目录
 
@@ -29,15 +29,14 @@ huatuo_upm 是 unity中huatuo使用工具的集合，用来模拟手工安装hua
                "name": "package.openupm.cn",
                "url": "https://package.openupm.cn",
                "scopes": [
-                   "com.focus-creative-games.huatuo",
-                   "com.openupm"
+                   "com.focus-creative-games.huatuo"
                ]
            }
        ]
    }
    ```
-
-4. 切换到unity Package Manager 中将看到名为   的包，其它操作在Package Manager中进行即可。
+   
+4. 打开Unity后会弹出 Edit->Project Settings->Package Manager界面，可以看到Scoped Registries中已经自动填充了信息。切换到Window->Package Manager->Packages: My Registries 中将看到名为`huatuo Tookit for Unity`的包，其它操作在Package Manager中进行即可。
 
 ### 方法2：使用openupm-cn命令行
 
@@ -46,10 +45,17 @@ huatuo_upm 是 unity中huatuo使用工具的集合，用来模拟手工安装hua
 1. 安装命令行工具
 2. 命令行中跳转到在对应Unity工程目录（包含Assets或Packages的目录）
 3. 输入命令安装`openupm-cn add com.focus-creative-games.huatuo`
+3. 后续操作参照方法1-第4步。
 
-### 方法3： 使用Unity Package Manager UI工具
+### 方法3： 使用Unity Package Manager 安装
 
-todo
+1. 在Unity中，点击 Edit->Project Settings，选择 Package Manager
+2. 在Scoped Registries中添加下面信息
+   - Name: package.openupm.cn
+   - URL: https://package.openupm.cn
+   - Scope(s): com.focus-creative-games.huatuo
+3. 点击Save
+4. 后续操作参照方法1-第4步。
 
 ## 工作原理
 
