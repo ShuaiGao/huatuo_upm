@@ -145,7 +145,7 @@ namespace Huatuo.Editor
                             EditorUtility.DisplayDialog("错误", $"下载{zipFileName}出错.\n{ret}", "ok");
                         }
                         EditorUtility.ClearProgressBar();
-                    }, false);
+                    });
                 while (itor.MoveNext())
                 {
                     yield return itor.Current;

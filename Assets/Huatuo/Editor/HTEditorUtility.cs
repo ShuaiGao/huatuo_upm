@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -72,7 +73,7 @@ namespace Huatuo.Editor
             {
                 Directory.Delete(destDir, true);
             }
-            
+
             Debug.Log($"[UnzipAsync]----:{zipFile} {destDir}");
             var tmpCnt = 0;
 
@@ -144,35 +145,123 @@ namespace Huatuo.Editor
         /// <param name="bValidateCertificate">是否选择忽略证书检查</param>
         /// <returns>协程</returns>
         public static IEnumerator DownloadFile(string strUrl, string strDstFile,
-            Action<float> progress, Action<string> done, bool bValidateCertificate = true)
+            Action<float> progress, Action<string> done, int retryCnt = 3, bool bValidateCertificate = false)
         {
-            Debug.Log($"[DownloadFile]{strUrl}\ndest:{strDstFile}");
-            if (File.Exists(strDstFile))
-            {
-                File.Delete(strDstFile);
-            }
+            var nPos = 0;
+            retryCnt = Math.Max(1, retryCnt);
 
-            yield return null;
-
-            using var www = new UnityWebRequest(strUrl)
+            var err = "";
+            do
             {
-                downloadHandler = new DownloadHandlerFile(strDstFile)
-            };
+                nPos++;
+                
+                Debug.Log($"[DownloadFile]{strUrl}\ndest:{strDstFile}");
+                if (File.Exists(strDstFile))
+                {
+                    File.Delete(strDstFile);
+                }
 
-            if (!bValidateCertificate)
-            {
-              //  www.certificateHandler = new IgnoreHttps();
-            }
-
-            progress?.Invoke(0f);
-            var req = www.SendWebRequest();
-            while (!req.isDone)
-            {
-                progress?.Invoke(req.progress);
                 yield return null;
-            }
 
-            done?.Invoke(www.error);
+                using var www = new UnityWebRequest(strUrl)
+                {
+                    downloadHandler = new DownloadHandlerFile(strDstFile),
+                    timeout = 1000
+                };
+
+                if (!bValidateCertificate)
+                {
+                    www.certificateHandler = new IgnoreHttps();
+                }
+
+                progress?.Invoke(0f);
+                var req = www.SendWebRequest();
+                while (!req.isDone)
+                {
+                    progress?.Invoke(req.progress);
+                    yield return null;
+                }
+
+                err = www.error;
+                if (string.IsNullOrEmpty(www.error))
+                {
+                    break;
+                }
+            } while (nPos < retryCnt);
+
+
+            done?.Invoke(err);
+        }
+
+        public static IEnumerator HttpRequest(string url, bool silent, Action<RemoteConfig> callback, int retryCnt = 3,
+            bool bValidateCertificate = false)
+        {
+            var nPos = 0;
+            retryCnt = Math.Max(1, retryCnt);
+
+            RemoteConfig ret = default;
+            do
+            {
+                nPos++;
+
+                Debug.Log($"Fetching {url} retry:{nPos - 1}");
+                using var www = new UnityWebRequest(url)
+                {
+                    downloadHandler = new DownloadHandlerBuffer(),
+                    timeout = 100
+                };
+
+                if (!bValidateCertificate)
+                {
+                    www.certificateHandler = new IgnoreHttps();
+                }
+
+                yield return www.SendWebRequest();
+                do
+                {
+                    if (!string.IsNullOrEmpty(www.error))
+                    {
+                        Debug.LogError(www.error);
+                        if (!silent)
+                        {
+                            EditorUtility.DisplayDialog("错误", $"【1】获取远程版本信息错误。\n[{www.error}]", "ok");
+                        }
+
+                        break;
+                    }
+
+                    var json = www.downloadHandler.text;
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
+                        if (!silent)
+                        {
+                            EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
+                        }
+
+                        break;
+                    }
+
+                    ret = JsonUtility.FromJson<RemoteConfig>(json);
+                    if (string.IsNullOrEmpty(ret.huatuo_recommend_version))
+                    {
+                        Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
+                        if (!silent)
+                        {
+                            EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
+                        }
+
+                        break;
+                    }
+                } while (false);
+
+                if (!ret.Equals(default(RemoteConfig)))
+                {
+                    break;
+                }
+            } while (nPos < retryCnt);
+
+            callback?.Invoke(ret);
         }
     }
 }

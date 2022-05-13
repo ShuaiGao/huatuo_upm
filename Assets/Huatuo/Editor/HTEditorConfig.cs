@@ -13,6 +13,7 @@ namespace Huatuo.Editor
     public static class HTEditorConfig
     {
         public static string UnityFullVersion = "";
+        public static string UnityVersionDigits = "";
 
         //public static readonly string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
         //public static readonly string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
@@ -43,6 +44,7 @@ namespace Huatuo.Editor
         public static void Init()
         {
             UnityFullVersion = InternalEditorUtility.GetFullUnityVersion();
+            UnityVersionDigits = InternalEditorUtility.GetUnityVersionDigits();
         }
     }
 }

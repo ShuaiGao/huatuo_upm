@@ -16,13 +16,15 @@ namespace Huatuo.Editor
         public long Timestamp;
         public string CacheDir;
     }
+    
     internal struct InstallVersion
     {
         public string il2cppTag;
         public string huatuoTag;
     }
+    
     [Serializable]
-    internal struct RemoteConfig
+    public struct RemoteConfig
     {
         public List<string> unity_version;
         public List<string> huatuo_version;
@@ -49,18 +51,20 @@ namespace Huatuo.Editor
         public string il2cpp_recommend_version;
         public string huatuo_recommend_version;
         public string huatuo_min_version;
+        
         public HuatuoRemoteConfig(RemoteConfig rc)
         {
             unity_version = rc.unity_version;
             huatuo_recommend_version = rc.huatuo_recommend_version;
             InitHuatuoVersion(rc);
-            InitIl2cppVersion(rc);
-            InitIl2cppRecommendVersion(rc);
+            InitIl2CppVersion(rc);
+            InitIl2CppRecommendVersion(rc);
         }
-        private bool BigThanMinVersion(string version, string min_version)
+        
+        private bool BigThanMinVersion(string version, string minVersion)
         {
             var a = version.Split('.');
-            var min = min_version.Split('.');
+            var min = minVersion.Split('.');
             for (int i = 0; i < a.Length && i < min.Length; i++)
             {
                 var nA = Convert.ToInt32(a[i]);
@@ -72,6 +76,7 @@ namespace Huatuo.Editor
             }
             return true;
         }
+        
         private void InitHuatuoVersion(RemoteConfig rc)
         {
             var ret = new List<string>();
@@ -92,14 +97,15 @@ namespace Huatuo.Editor
             }
             huatuo_version = ret;
         }
-        private void InitIl2cppVersion(RemoteConfig rc)
+        
+        private void InitIl2CppVersion(RemoteConfig rc)
         {
             var ret = new List<string>();
             if (rc.il2cpp_version != null)
             {
                 foreach (string version in rc.il2cpp_version)
                 {
-                    if (version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                    if (version.StartsWith(HTEditorConfig.UnityVersionDigits))
                     {
                         ret.Add(version);
                     }
@@ -107,11 +113,12 @@ namespace Huatuo.Editor
             }
             il2cpp_version = ret;
         }
-        private void InitIl2cppRecommendVersion(RemoteConfig rc)
+        
+        private void InitIl2CppRecommendVersion(RemoteConfig rc)
         {
-            foreach (string version in rc.il2cpp_recommend_version)
+            foreach (var version in rc.il2cpp_recommend_version)
             {
-                if (version.StartsWith(InternalEditorUtility.GetUnityVersionDigits()))
+                if (version.StartsWith(HTEditorConfig.UnityVersionDigits))
                 {
                     il2cpp_recommend_version = version;
                     break;

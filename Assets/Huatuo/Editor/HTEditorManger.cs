@@ -75,6 +75,8 @@ namespace Huatuo.Editor
         {
             m_bHasIl2cpp = Directory.Exists(HTEditorConfig.Il2cppPath);
             HTEditorInstaller.Instance.Init();
+            
+            Repaint();
         }
 
         /// <summary>
@@ -101,7 +103,7 @@ namespace Huatuo.Editor
                 this.StopCoroutine(m_corFetchManifest.routine);
             }
 
-            m_corFetchManifest = this.StartCoroutine(GetSdkVersions(true, () => { ReloadVersion(); }));
+            m_corFetchManifest = this.StartCoroutine(GetSdkVersions(true, ReloadVersion));
 
             m_bInitialized = true;
         }
@@ -272,7 +274,7 @@ namespace Huatuo.Editor
                                 haserr = true;
                                 EditorUtility.DisplayDialog("错误", $"下载{kv.Value.Item1}出错.\n{ret}", "ok");
                             }
-                        }, false);
+                        });
                     while (itor.MoveNext())
                     {
                         yield return itor.Current;
@@ -522,59 +524,6 @@ namespace Huatuo.Editor
             }
         }
 
-        private IEnumerator HttpRequest(string url, bool silent, Action<RemoteConfig> callback)
-        {
-            Debug.Log($"Fetching {url}");
-            using var www = new UnityWebRequest(url)
-
-            {
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            yield return www.SendWebRequest();
-
-            RemoteConfig ret = new RemoteConfig();
-            do
-            {
-                if (!string.IsNullOrEmpty(www.error))
-                {
-                    Debug.LogError(www.error);
-                    if (!silent)
-                    {
-                        EditorUtility.DisplayDialog("错误", $"【1】获取远程版本信息错误。\n[{www.error}]", "ok");
-                    }
-
-                    //m_bVersionUnsported = www.error.Contains("404") && www.error.Contains("Found");
-                    break;
-                }
-
-                var json = www.downloadHandler.text;
-                if (string.IsNullOrEmpty(json))
-                {
-                    Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                    if (!silent)
-                    {
-                        EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
-                    }
-
-                    break;
-                }
-
-                ret = JsonUtility.FromJson<RemoteConfig>(json);
-                if (string.IsNullOrEmpty(ret.huatuo_recommend_version))
-                {
-                    Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                    if (!silent)
-                    {
-                        EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
-                    }
-
-                    break;
-                }
-            } while (false);
-
-            callback?.Invoke(ret);
-        }
-
         /// <summary>
         /// 获取远程的版本信息/re
         /// </summary>
@@ -588,19 +537,33 @@ namespace Huatuo.Editor
             // Wait one frame so that we don't try to show the progress bar in the middle of OnGUI().
             yield return null;
 
-            var itor = HttpRequest(HTEditorConfig.urlVersionConfig, silent, rc =>
-            {
-                m_remoteConfig = new HuatuoRemoteConfig(rc);
-                var unityVersion = InternalEditorUtility.GetUnityVersionDigits();
-                if (!m_remoteConfig.unity_version.Contains(unityVersion))
+            m_remoteConfig = null;
+            var itor = HTEditorUtility.HttpRequest(HTEditorConfig.urlVersionConfig, silent,
+                remoteConfig =>
                 {
-                    m_bVersionUnsported = true;
-                }
-            });
+                    if (!remoteConfig.Equals(default(RemoteConfig)))
+                    {
+                        m_remoteConfig = new HuatuoRemoteConfig(remoteConfig);
+                        if (!m_remoteConfig.unity_version.Contains(HTEditorConfig.UnityVersionDigits))
+                        {
+                            m_bVersionUnsported = true;
+                        }
+                    }
+                });
             while (itor.MoveNext())
             {
                 yield return itor.Current;
             }
+
+            if (m_remoteConfig == null)
+            {
+                Debug.LogError("无法获取版本信息...");
+                if (!silent)
+                {
+                    EditorUtility.DisplayDialog("错误", "无法获取版本信息...", "ok");
+                }
+            }
+
             m_corFetchManifest = null;
             callback?.Invoke();
         }
@@ -638,9 +601,11 @@ namespace Huatuo.Editor
             m_corFetchManifest = this.StartCoroutine(GetSdkVersions(false, () =>
             {
                 ReloadVersion();
-                var s = JsonUtility.ToJson(m_remoteConfig, true);
-                Debug.Log($"huatuo version: {m_remoteConfig.huatuo_recommend_version}");
-                Debug.Log($"il2cpp version: {m_remoteConfig.il2cpp_recommend_version}");
+                if (m_remoteConfig != null)
+                {
+                    Debug.Log($"huatuo version: {m_remoteConfig.huatuo_recommend_version}");
+                    Debug.Log($"il2cpp version: {m_remoteConfig.il2cpp_recommend_version}");
+                }
             }));
         }
 
