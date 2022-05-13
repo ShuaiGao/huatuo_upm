@@ -19,7 +19,6 @@ namespace Huatuo.Editor
         private static readonly Vector2 m_vecMinSize = new Vector2(620f, 455);
 
         private bool m_bInitialized = false;
-        private bool m_bHasHuatuo = false;
         private bool m_bHasIl2cpp = false;
         private bool m_bVersionUnsported = false;
         private bool m_bShowOtherVersion = false;

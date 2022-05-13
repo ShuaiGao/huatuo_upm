@@ -67,7 +67,7 @@ namespace Huatuo.Editor
         {
             if (path == null || path.Length == 0)
             {
-                CacheBasePath = Path.Combine(Path.GetFullPath("."), CacheDirName);
+                CacheBasePath = Path.Combine(Path.GetFullPath("Library"), CacheDirName);
             }
             else
             {
