@@ -37,7 +37,7 @@ namespace Huatuo.Editor
         public static readonly string Il2cppPath = Path.Combine(EditorBasePath, "il2cpp");
         public static readonly string Libil2cppPath = Path.Combine(Il2cppPath, "libil2cpp");
         public static readonly string Libil2cppOritinalPath = Path.Combine(Il2cppPath, "libil2cpp_original_unity");
-        public static readonly string HuatuoPath = Path.Combine(Il2cppPath, "huatuo");
+        public static readonly string HuatuoPath = Path.Combine(HuatuoIL2CPPPath, "huatuo");
 
         public static string DownloadCache = "";
         public static string HuatuoVersionPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");

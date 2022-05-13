@@ -151,6 +151,7 @@ namespace Huatuo.Editor
             };
         }
 
+        /*
         /// <summary>
         /// 启用/禁用Huatuo插件
         /// </summary>
@@ -177,7 +178,7 @@ namespace Huatuo.Editor
                 HTEditorInstaller.Disable(ret => { endFunc?.Invoke(ret); });
             }
         }
-
+*/
         /// <summary>
         /// 升级中...
         /// </summary>
@@ -214,13 +215,20 @@ namespace Huatuo.Editor
             }
             else
             {
-                 HTEditorInstaller.Instance.Install(version);
+                itor = HTEditorInstaller.Instance.Install(version,
+                    ret => { EditorUtility.DisplayDialog("结果", $"安装{(ret ? "成功" : "失败")}", "ok"); });
+                while (itor.MoveNext())
+                {
+                    yield return itor.Current;
+                }
             }
 
-            ReloadVersion();
             m_corUpgrade = null;
+
+            ReloadVersion();
         }
 
+        /*
         private IEnumerator Upgrading()
         {
             var itor = GetSdkVersions(true, null);
@@ -372,7 +380,7 @@ namespace Huatuo.Editor
 
             m_corUpgrade = null;
         }
-
+*/
         /// <summary>
         /// 对Huatuo环境进行检查
         /// </summary>
@@ -538,8 +546,8 @@ namespace Huatuo.Editor
             yield return null;
 
             m_remoteConfig = null;
-            var itor = HTEditorUtility.HttpRequest(HTEditorConfig.urlVersionConfig, silent,
-                remoteConfig =>
+            var itor = HTEditorUtility.HttpRequest(HTEditorConfig.urlVersionConfig,
+                (remoteConfig, err) =>
                 {
                     if (!remoteConfig.Equals(default(RemoteConfig)))
                     {
@@ -548,6 +556,10 @@ namespace Huatuo.Editor
                         {
                             m_bVersionUnsported = true;
                         }
+                    }
+                    else if (!string.IsNullOrEmpty(err) && !silent)
+                    {
+                        EditorUtility.DisplayDialog("错误", err, "ok");
                     }
                 });
             while (itor.MoveNext())
@@ -565,6 +577,7 @@ namespace Huatuo.Editor
             }
 
             m_corFetchManifest = null;
+            
             callback?.Invoke();
         }
 
@@ -601,6 +614,7 @@ namespace Huatuo.Editor
             m_corFetchManifest = this.StartCoroutine(GetSdkVersions(false, () =>
             {
                 ReloadVersion();
+                
                 if (m_remoteConfig != null)
                 {
                     Debug.Log($"huatuo version: {m_remoteConfig.huatuo_recommend_version}");

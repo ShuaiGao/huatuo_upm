@@ -135,16 +135,27 @@ namespace Huatuo.Editor
             }
             else
             {
+                var curRetryCnt = 0;
+                var maxRetryCnt = 0;
                 var itor = HTEditorUtility.DownloadFile(downloadUrl, zipPath,
-                    p => { EditorUtility.DisplayProgressBar("下载中...", $"{m_counter}/{m_nDownloadTotal}", p); },
+                    (curCnt, maxCnt) =>
+                    {
+                        curRetryCnt = curCnt;
+                        maxRetryCnt = maxCnt;
+                    },
+                    p =>
+                    {
+                        var msg = $"下载中{(curRetryCnt > 0 ? $"[重试{curRetryCnt}/{maxRetryCnt}]" : "...")}";
+                        EditorUtility.DisplayProgressBar(msg, $"{m_counter}/{m_nDownloadTotal}", p);
+                    },
                     ret =>
                     {
+                        EditorUtility.ClearProgressBar();
                         if (!string.IsNullOrEmpty(ret))
                         {
                             downloadErr = true;
                             EditorUtility.DisplayDialog("错误", $"下载{zipFileName}出错.\n{ret}", "ok");
                         }
-                        EditorUtility.ClearProgressBar();
                     });
                 while (itor.MoveNext())
                 {

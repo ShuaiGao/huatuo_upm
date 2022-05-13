@@ -100,6 +100,33 @@ namespace Huatuo.Editor
         }
 
         /// <summary>
+        /// 拷贝
+        /// </summary>
+        /// <param name="src">源目录</param>
+        /// <param name="dst">目标目录</param>
+        public static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            try
+            {
+                //创建所有新目录
+                foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                {
+                    Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                }
+
+                //复制所有文件 & 保持文件名和路径一致
+                foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                {
+                    File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
+
+        /// <summary>
         /// 移动目录
         /// </summary>
         /// <param name="src">源目录</param>
@@ -107,6 +134,7 @@ namespace Huatuo.Editor
         /// <returns>错误信息</returns>
         public static string Mv(string src, string dst)
         {
+            Debug.Log($"[MV] {src} {dst}");
             var ret = "";
             if (!Directory.Exists(src))
             {
@@ -144,17 +172,20 @@ namespace Huatuo.Editor
         /// <param name="done">下载完成，参数是错误信息</param>
         /// <param name="bValidateCertificate">是否选择忽略证书检查</param>
         /// <returns>协程</returns>
-        public static IEnumerator DownloadFile(string strUrl, string strDstFile,
+        public static IEnumerator DownloadFile(string strUrl, string strDstFile, Action<int, int> begin,
             Action<float> progress, Action<string> done, int retryCnt = 3, bool bValidateCertificate = false)
         {
             var nPos = 0;
+            retryCnt++;
             retryCnt = Math.Max(1, retryCnt);
 
             var err = "";
             do
             {
+                begin?.Invoke(nPos, retryCnt - 1);
+
                 nPos++;
-                
+
                 Debug.Log($"[DownloadFile]{strUrl}\ndest:{strDstFile}");
                 if (File.Exists(strDstFile))
                 {
@@ -163,6 +194,20 @@ namespace Huatuo.Editor
 
                 yield return null;
 
+                /*
+                ulong totalLength = 0;
+                
+                using var headRequest = UnityWebRequest.Head(strUrl);
+                yield return headRequest.SendWebRequest();
+                if (!string.IsNullOrEmpty(headRequest.error))
+                {
+                    Debug.LogError("获取下载的文件大小失败");
+                    break;
+                }
+                
+                totalLength = ulong.Parse(headRequest.GetResponseHeader("Content-Length"));//获取文件总大小
+                Debug.Log("获取大小" + totalLength);
+*/
                 using var www = new UnityWebRequest(strUrl)
                 {
                     downloadHandler = new DownloadHandlerFile(strDstFile),
@@ -182,6 +227,7 @@ namespace Huatuo.Editor
                     yield return null;
                 }
 
+                progress?.Invoke(100f);
                 err = www.error;
                 if (string.IsNullOrEmpty(www.error))
                 {
@@ -193,18 +239,25 @@ namespace Huatuo.Editor
             done?.Invoke(err);
         }
 
-        public static IEnumerator HttpRequest(string url, bool silent, Action<RemoteConfig> callback, int retryCnt = 3,
+        public static IEnumerator HttpRequest(string url, Action<RemoteConfig, string> callback, int retryCnt = 3,
             bool bValidateCertificate = false)
         {
             var nPos = 0;
+            retryCnt++;
             retryCnt = Math.Max(1, retryCnt);
 
+            var err = "";
             RemoteConfig ret = default;
             do
             {
                 nPos++;
+                var msg = $"Fetching {url}";
+                if (nPos > 1)
+                {
+                    msg = $"{msg} retry:{nPos - 1}";
+                }
 
-                Debug.Log($"Fetching {url} retry:{nPos - 1}");
+                Debug.Log(msg);
                 using var www = new UnityWebRequest(url)
                 {
                     downloadHandler = new DownloadHandlerBuffer(),
@@ -222,10 +275,7 @@ namespace Huatuo.Editor
                     if (!string.IsNullOrEmpty(www.error))
                     {
                         Debug.LogError(www.error);
-                        if (!silent)
-                        {
-                            EditorUtility.DisplayDialog("错误", $"【1】获取远程版本信息错误。\n[{www.error}]", "ok");
-                        }
+                        err = $"【1】获取远程版本信息错误。\n[{www.error}]";
 
                         break;
                     }
@@ -234,10 +284,7 @@ namespace Huatuo.Editor
                     if (string.IsNullOrEmpty(json))
                     {
                         Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                        if (!silent)
-                        {
-                            EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
-                        }
+                        err = $"【2】获取远程版本信息错误。";
 
                         break;
                     }
@@ -246,10 +293,7 @@ namespace Huatuo.Editor
                     if (string.IsNullOrEmpty(ret.huatuo_recommend_version))
                     {
                         Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                        if (!silent)
-                        {
-                            EditorUtility.DisplayDialog("错误", $"【2】获取远程版本信息错误。", "ok");
-                        }
+                        err = $"【3】获取远程版本信息错误。";
 
                         break;
                     }
@@ -261,7 +305,7 @@ namespace Huatuo.Editor
                 }
             } while (nPos < retryCnt);
 
-            callback?.Invoke(ret);
+            callback?.Invoke(ret, err);
         }
     }
 }
