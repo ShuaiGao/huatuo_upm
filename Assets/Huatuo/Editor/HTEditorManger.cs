@@ -93,7 +93,7 @@ namespace Huatuo.Editor
             HTEditorConfig.Init();
 
             m_logo = new HTLogo();
-            m_logo.Init(m_vecMinSize);
+            m_logo.Init(m_vecMinSize, this);
 
             ReloadVersion();
 
@@ -109,6 +109,7 @@ namespace Huatuo.Editor
 
         private void OnDestroy()
         {
+            m_logo.Destroy();
             this.StopAllCoroutines();
         }
 

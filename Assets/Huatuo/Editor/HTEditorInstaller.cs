@@ -170,6 +170,12 @@ namespace Huatuo.Editor
 
             EditorUtility.ClearProgressBar();
             
+            if (haserr)
+            {
+                callback?.Invoke(false);
+                yield break;
+            }
+
             var il2cppDirName = il2cppCachePath + $"/il2cpp_huatuo-{m_InstallVersion.il2cppTag}/libil2cpp";
             var huatuoDirName = huatuoCachePath + $"/huatuo-{m_InstallVersion.huatuoTag}/huatuo";
             if (!Directory.Exists(il2cppDirName))
