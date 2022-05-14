@@ -69,7 +69,7 @@ namespace Huatuo.Editor
             }
 
             _rippleEffect = new RippleEffect();
-            _rippleEffect.Init(_currentMaterial, _rtImage.width / _rtImage.height);
+            _rippleEffect.Init(_currentMaterial, _rtImage.width, _rtImage.height);
 
             EditorApplication.update += Update;
         }
