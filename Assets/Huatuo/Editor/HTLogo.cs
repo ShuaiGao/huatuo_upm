@@ -17,7 +17,7 @@ namespace Huatuo.Editor
         private Rect _rtImage = Rect.zero;
 
         public int ImgHeight = 0;
-        
+
         private Material _currentMaterial = null;
         private RippleEffect _rippleEffect = null;
 
@@ -28,20 +28,20 @@ namespace Huatuo.Editor
             _logoImage = null;
             ImgHeight = 0;
             _rtImage = Rect.zero;
-            
+
             var files = AssetDatabase.FindAssets("t:texture HuatuoLogoImage");
             if (files == null || files.Length == 0)
             {
                 return;
             }
-            
+
             var file = files[0];
             _logoImage = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(file));
             if (_logoImage == null)
             {
                 return;
             }
-            
+
             ImgHeight = (int) (winSize.x / _logoImage.width * _logoImage.height);
             _rtImage = new Rect(0, 0, winSize.x, ImgHeight);
         }
@@ -52,51 +52,43 @@ namespace Huatuo.Editor
             {
                 return;
             }
-            
+
             _currentMaterial = null;
-            
+
             var files = AssetDatabase.FindAssets("t:Material HuatuoLogoMat");
             if (files == null || files.Length == 0)
             {
                 return;
             }
-            
+
             var file = files[0];
             _currentMaterial = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(file));
-
-            if (_currentMaterial != null)
+            if (_currentMaterial == null)
             {
-                _rippleEffect = new RippleEffect();
-                _rippleEffect.Init(_currentMaterial, _rtImage.width/_rtImage.height);
-
-                EditorApplication.update += Update;
+                return;
             }
+
+            _rippleEffect = new RippleEffect();
+            _rippleEffect.Init(_currentMaterial, _rtImage.width / _rtImage.height);
+
+            EditorApplication.update += Update;
         }
 
         public void Destroy()
         {
             EditorApplication.update -= Update;
 
-            if (_rippleEffect != null)
-            {
-                _rippleEffect.Destroy();
-            }
-            
+            _rippleEffect?.Destroy();
             _rippleEffect = null;
             _window = null;
         }
-        
+
         private void Update()
         {
-            if (_rippleEffect == null)
-            {
-                return;
-            }
-            
-            _rippleEffect.Update();
-            _window.Repaint();
+            _rippleEffect?.Update();
+            _window?.Repaint();
         }
-        
+
         public void Init(Vector2 winSize, EditorWindow window)
         {
             _window = window;
@@ -106,10 +98,12 @@ namespace Huatuo.Editor
 
         public void OnGUI()
         {
-            if (_logoImage != null)
+            if (_logoImage == null)
             {
-                Graphics.DrawTexture(_rtImage, _logoImage, _currentMaterial);
+                return;
             }
+
+            Graphics.DrawTexture(_rtImage, _logoImage, _currentMaterial);
         }
     }
 }

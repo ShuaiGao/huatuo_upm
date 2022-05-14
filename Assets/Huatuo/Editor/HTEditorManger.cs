@@ -638,11 +638,11 @@ namespace Huatuo.Editor
 
             InstallOrUpgradeGui();
 
-            GUILayout.Space(120);
+            EditorGUI.EndDisabledGroup();
+            
+            GUILayout.FlexibleSpace();
 
             FooterGui();
-
-            EditorGUI.EndDisabledGroup();
         }
     }
 }
