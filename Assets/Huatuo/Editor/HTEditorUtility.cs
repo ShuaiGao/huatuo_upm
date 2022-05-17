@@ -47,7 +47,7 @@ namespace Huatuo.Editor
         {
             if (string.IsNullOrEmpty(version))
             {
-                return new[] {0};
+                return new[] { 0 };
             }
 
             int piece;
@@ -238,8 +238,7 @@ namespace Huatuo.Editor
 
             done?.Invoke(err);
         }
-
-        public static IEnumerator HttpRequest(string url, Action<RemoteConfig, string> callback, int retryCnt = 3,
+        public static IEnumerator HttpRequest<T>(string url, Action<T, string> callback, int retryCnt = 3,
             bool bValidateCertificate = false)
         {
             var nPos = 0;
@@ -247,7 +246,7 @@ namespace Huatuo.Editor
             retryCnt = Math.Max(1, retryCnt);
 
             var err = "";
-            RemoteConfig ret = default;
+            T ret = default;
             do
             {
                 nPos++;
@@ -275,7 +274,7 @@ namespace Huatuo.Editor
                     if (!string.IsNullOrEmpty(www.error))
                     {
                         Debug.LogError(www.error);
-                        err = $"【1】获取远程版本信息错误。\n[{www.error}]";
+                        err = $"【1】Http error。\n[{www.error}]";
 
                         break;
                     }
@@ -284,19 +283,16 @@ namespace Huatuo.Editor
                     if (string.IsNullOrEmpty(json))
                     {
                         Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                        err = $"【2】获取远程版本信息错误。";
+                        err = $"【2】Http error。";
 
                         break;
                     }
-
-                    ret = JsonUtility.FromJson<RemoteConfig>(json);
-                    if (string.IsNullOrEmpty(ret.huatuo_recommend_version))
+                    if (json.StartsWith("["))
                     {
-                        Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                        err = $"【3】获取远程版本信息错误。";
-
-                        break;
+                        json = $"{{\"items\":{json}}}";
                     }
+
+                    ret = JsonUtility.FromJson<T>(json);
                 } while (false);
 
                 if (!ret.Equals(default(RemoteConfig)))

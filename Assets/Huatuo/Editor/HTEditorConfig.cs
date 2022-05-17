@@ -18,10 +18,12 @@ namespace Huatuo.Editor
         //public static readonly string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
         //public static readonly string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
         //public static readonly string huatuoPrefixGitee = "https://gitee.com/focus-creative-games/huatuo/repository/archive";
-        //public static readonly string huatuoPrefixGithub = "https://github.com/focus-creative-games//huatuo/archive/refs/heads";
+        public static readonly string huatuoPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/heads/";
         public static readonly string libil2cppTagPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/tags";
         public static readonly string huatuoTagPrefixGithub = "https://github.com/focus-creative-games/huatuo/archive/refs/tags";
         public static readonly string urlVersionConfig = "https://focus-creative-games.github.io/huatuo_upm/Doc/version.json";
+        public static readonly string urlHuatuoCommits = "https://api.github.com/repos/focus-creative-games/huatuo/commits";
+        public static readonly string urlHuatuoTags = "https://api.github.com/repos/focus-creative-games/huatuo/tags";
 
         private static readonly string WebSiteBase = "https://github.com/focus-creative-games/huatuo";
         public static readonly string WebSite = WebSiteBase;

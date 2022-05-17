@@ -137,7 +137,7 @@ namespace Huatuo.Editor
         private IEnumerator Extract(Action<bool> callback)
         {
             var il2cppZip = HTEditorCache.Instance.GetZipPath(EFILE_NAME.IL2CPP, m_InstallVersion.il2cppTag);
-            var huatuozip = HTEditorCache.Instance.GetZipPath(EFILE_NAME.HUATUO, m_InstallVersion.huatuoTag);
+            var huatuozip = HTEditorCache.Instance.GetZipPath(m_InstallVersion.huatuoType, m_InstallVersion.huatuoTag);
 
             var il2cppCachePath = Path.GetDirectoryName(il2cppZip) + $"/il2cpp_huatuo-{m_InstallVersion.il2cppTag}";
             var huatuoCachePath = Path.GetDirectoryName(huatuozip) + $"/huatuo-{m_InstallVersion.huatuoTag}";
@@ -155,7 +155,7 @@ namespace Huatuo.Editor
 
             if (haserr)
             {
-                callback?.Invoke(false);
+                callback?.Invoke(true);
                 yield break;
             }
 
@@ -172,23 +172,23 @@ namespace Huatuo.Editor
             
             if (haserr)
             {
-                callback?.Invoke(false);
+                callback?.Invoke(true);
                 yield break;
             }
 
             var il2cppDirName = il2cppCachePath + $"/il2cpp_huatuo-{m_InstallVersion.il2cppTag}/libil2cpp";
-            var huatuoDirName = huatuoCachePath + $"/huatuo-{m_InstallVersion.huatuoTag}/huatuo";
+            var huatuoDirName = huatuoCachePath + HTEditorCache.GetHuatuoZipInnerFolder(m_InstallVersion.huatuoType, m_InstallVersion.huatuoTag);
             if (!Directory.Exists(il2cppDirName))
             {
                 Debug.LogError($"{il2cppDirName} not exists!!!");
-                callback?.Invoke(false);
+                callback?.Invoke(true);
                 yield break;
             }
 
             if (!Directory.Exists(huatuoDirName))
             {
                 Debug.LogError($"{huatuoDirName} not exists!!!");
-                callback?.Invoke(false);
+                callback?.Invoke(true);
                 yield break;
             }
 
@@ -316,8 +316,8 @@ namespace Huatuo.Editor
             // TODO 记录libil2cpp 和 huatuo 版本信息
             m_HuatuoVersion.HuatuoTag = m_InstallVersion.huatuoTag;
             m_HuatuoVersion.Il2cppTag = m_InstallVersion.il2cppTag;
-            m_HuatuoVersion.Il2cppUrl = HTEditorCache.Instance.GetDownUrlWithTagIl2cpp(m_InstallVersion.il2cppTag);
-            m_HuatuoVersion.HuatuoUrl = HTEditorCache.Instance.GetDownUrlWithTagHuatuo(m_InstallVersion.huatuoTag);
+            //m_HuatuoVersion.Il2cppUrl = HTEditorCache.Instance.GetDownUrlWithTagIl2cpp(m_InstallVersion.il2cppTag);
+            //m_HuatuoVersion.HuatuoUrl = HTEditorCache.Instance.GetDownUrlWithTagHuatuo(m_InstallVersion.huatuoTag);
             m_HuatuoVersion.InstallTime = DateTime.Now.ToString();
             m_HuatuoVersion.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
             Debug.Log($"Save huatuo install version, path: {HTEditorConfig.HuatuoVersionPath}");

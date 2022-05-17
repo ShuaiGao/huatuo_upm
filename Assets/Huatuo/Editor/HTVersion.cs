@@ -19,10 +19,42 @@ namespace Huatuo.Editor
     
     internal struct InstallVersion
     {
+        public EFILE_NAME huatuoType;
         public string il2cppTag;
         public string huatuoTag;
     }
-    
+
+
+    [Serializable]
+    public struct CommitItem
+    {
+        public string sha;
+        public string url;
+        public string message;
+        public string html_url;
+        public string comments_url;
+        public string GetShaShort()
+        {
+            return sha.Substring(0, 6);
+        }
+    }
+
+    public struct ItemSerial<T>
+    {
+        public List<T> items;
+    }
+
+    [Serializable]
+    public struct TagItem
+    {
+        public string name;
+        public string zipball_url;
+        public string tarball_url;
+        public string node_id;
+        public CommitItem commit;
+    }
+
+
     [Serializable]
     public struct RemoteConfig
     {

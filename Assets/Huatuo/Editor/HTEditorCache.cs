@@ -8,8 +8,10 @@ namespace Huatuo.Editor
 {
     enum EFILE_NAME
     {
+        NONE,
         HUATUO,
-        IL2CPP
+        IL2CPP,
+        HUATUO_MAIN,
     }
 
     internal class HTEditorCache
@@ -88,11 +90,42 @@ namespace Huatuo.Editor
             return @$"{libil2cppTagPrefix}/{tag}.zip";
         }
 
+        public string GetZipName(EFILE_NAME nameType, string tag)
+        {
+            var zipFileName = "";
+            switch (nameType)
+            {
+                case EFILE_NAME.HUATUO:
+                    zipFileName = $"huatuo-{tag}";
+                    break;
+                case EFILE_NAME.IL2CPP:
+                    zipFileName = $"il2cpp_huatuo-{tag}";
+                    break;
+                default:
+                    throw new Exception($"no support file type{nameof(nameType)}");
+            }
+
+            return zipFileName;
+        }
+        public static string GetHuatuoZipInnerFolder(EFILE_NAME nameType, string tag)
+        {
+            switch (nameType)
+            {
+                case EFILE_NAME.HUATUO_MAIN:
+                    return  $"/huatuo-main/huatuo";
+                case EFILE_NAME.HUATUO:
+                    return  $"/huatuo-{tag}/huatuo";
+            }
+            return "error param";
+        }
         public string GetZipPath(EFILE_NAME nameType, string tag)
         {
             var zipFileName = "";
             switch (nameType)
             {
+                case EFILE_NAME.HUATUO_MAIN:
+                    zipFileName = $"huatuo-{tag}";
+                    break;
                 case EFILE_NAME.HUATUO:
                     zipFileName = $"huatuo-{tag}";
                     break;
@@ -113,6 +146,10 @@ namespace Huatuo.Editor
             var zipFileName = "";
             switch (nameType)
             {
+                case EFILE_NAME.HUATUO_MAIN:
+                    zipFileName = $"huatuo-{tag}";
+                    downloadUrl = @$"{HTEditorConfig.huatuoPrefixGithub}/main.zip";
+                    break;
                 case EFILE_NAME.HUATUO:
                     zipFileName = $"huatuo-{tag}";
                     downloadUrl = @$"{huatuoTagPrefix}/{tag}.zip";
