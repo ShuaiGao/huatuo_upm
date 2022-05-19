@@ -67,17 +67,26 @@ namespace Huatuo.Editor
 
         public void SetCacheDirectory(string path)
         {
+            var tmp = "";
             if (path == null || path.Length == 0)
             {
-                CacheBasePath = Path.Combine(Path.GetFullPath("Library"), CacheDirName);
+                tmp = Path.Combine(Path.GetFullPath("Library"), CacheDirName);
             }
             else
             {
-                CacheBasePath = path;
+                tmp = path;
             }
 
-            Directory.CreateDirectory(CacheBasePath);
-            HTEditorInstaller.Instance.SaveCacheDir();
+            try
+            {
+                Directory.CreateDirectory(tmp);
+                CacheBasePath = tmp;
+                HTEditorInstaller.Instance.SaveCacheDir();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Debug.LogError("缓存设置失败，请不要使用C盘路径做缓存");
+            }
         }
 
         public string GetDownUrlWithTagHuatuo(string tag)
@@ -112,9 +121,9 @@ namespace Huatuo.Editor
             switch (nameType)
             {
                 case EFILE_NAME.HUATUO_MAIN:
-                    return  $"/huatuo-main/huatuo";
+                    return $"/huatuo-main/huatuo";
                 case EFILE_NAME.HUATUO:
-                    return  $"/huatuo-{tag}/huatuo";
+                    return $"/huatuo-{tag}/huatuo";
             }
             return "error param";
         }

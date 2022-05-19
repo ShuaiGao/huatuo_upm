@@ -21,6 +21,7 @@ namespace Huatuo.Editor
         private bool m_bInitialized = false;
         private bool m_bHasIl2cpp = false;
         private bool m_bVersionUnsported = false;
+        private bool m_bUnsportedC = false;
         private bool m_bShowOtherVersion = false;
 
         private GUIStyle m_styleNormalFont = null;
@@ -97,6 +98,10 @@ namespace Huatuo.Editor
             m_logo = new HTLogo();
             m_logo.Init(m_vecMinSize, this);
 
+            if (!HTEditorConfig.Il2cppPath.StartsWith("c:") || !HTEditorConfig.Il2cppPath.StartsWith("C:"))
+            {
+                m_bUnsportedC = true;
+            }
             ReloadVersion();
             CheckUpdate();
 
@@ -435,27 +440,37 @@ namespace Huatuo.Editor
                 return;
             }
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"缓存路径:", m_styleNormalFont, GUILayout.Width(65));
-            GUILayout.TextField(HTEditorCache.Instance.CacheBasePath);
-            if (GUILayout.Button("修改缓存路径", m_styleNormalBtn, GUILayout.Width(150)))
+            if (m_bUnsportedC)
             {
-                var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorCache.Instance.CacheBasePath, "");
-                if (cachePath.Length == 0)
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"<color=red>你的Unity安装在C盘版本，当前工具无法处理安装卸载!</color>", m_styleWarningFont);
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"缓存路径:", m_styleNormalFont, GUILayout.Width(65));
+                GUILayout.TextField(HTEditorCache.Instance.CacheBasePath);
+                if (GUILayout.Button("修改缓存路径", m_styleNormalBtn, GUILayout.Width(150)))
                 {
-                    return;
+                    var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorCache.Instance.CacheBasePath, "");
+                    if (cachePath.Length == 0)
+                    {
+                        return;
+                    }
+
+                    if (!Directory.Exists(cachePath))
+                    {
+                        EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
+                        return;
+                    }
+
+                    HTEditorCache.Instance.SetCacheDirectory(cachePath);
                 }
 
-                if (!Directory.Exists(cachePath))
-                {
-                    EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
-                    return;
-                }
-
-                HTEditorCache.Instance.SetCacheDirectory(cachePath);
+                GUILayout.EndHorizontal();
             }
 
-            GUILayout.EndHorizontal();
 
             var strMsg = "";
             var strColor = "<color=green>";
