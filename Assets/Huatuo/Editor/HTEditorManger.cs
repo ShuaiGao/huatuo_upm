@@ -98,7 +98,7 @@ namespace Huatuo.Editor
             m_logo = new HTLogo();
             m_logo.Init(m_vecMinSize, this);
 
-            if (!HTEditorConfig.Il2cppPath.StartsWith("c:") || !HTEditorConfig.Il2cppPath.StartsWith("C:"))
+            if (HTEditorConfig.Il2cppPath.StartsWith("c:") || HTEditorConfig.Il2cppPath.StartsWith("C:"))
             {
                 m_bUnsportedC = true;
             }

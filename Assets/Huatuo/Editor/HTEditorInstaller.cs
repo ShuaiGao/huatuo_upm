@@ -202,6 +202,13 @@ namespace Huatuo.Editor
                 HTEditorUtility.CopyFilesRecursively(il2cppDirName, HTEditorConfig.HuatuoIL2CPPPath);
                 HTEditorUtility.CopyFilesRecursively(huatuoDirName, HTEditorConfig.HuatuoPath);
             }
+            catch (IOException ex)
+            {
+                // 当cmd占用了libil2cpp目录时，会出现这个报错
+                Debug.LogError("libil2cpp 文件夹或路径被其它程序打开无法操作, 请检查占用并重试。");
+                Debug.LogException(ex);
+                haserr = true;
+            }
             catch (Exception ex)
             {
                 Debug.LogException(ex);

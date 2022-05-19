@@ -86,6 +86,7 @@ namespace Huatuo.Editor
             catch (UnauthorizedAccessException ex)
             {
                 Debug.LogError("缓存设置失败，请不要使用C盘路径做缓存");
+                Debug.LogException(ex);
             }
         }
 
