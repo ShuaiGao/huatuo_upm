@@ -273,17 +273,16 @@ namespace Huatuo.Editor
                 {
                     if (!string.IsNullOrEmpty(www.error))
                     {
-                        Debug.LogError(www.error);
-                        err = $"【1】Http error。\n[{www.error}]";
-
+                        Debug.LogWarning(www.error);
+                        err = $"【1】Http error。\n[{www.error}]\n{url}";
                         break;
                     }
 
                     var json = www.downloadHandler.text;
                     if (string.IsNullOrEmpty(json))
                     {
-                        Debug.LogError("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
-                        err = $"【2】Http error。";
+                        Debug.LogWarning("Unable to retrieve SDK version manifest.  Showing installed SDKs only.");
+                        err = $"【2】Http error。\n{url}";
 
                         break;
                     }
@@ -301,6 +300,23 @@ namespace Huatuo.Editor
                 }
             } while (nPos < retryCnt);
 
+            if (string.IsNullOrEmpty(err))
+            {
+                HTEditorCache.Instance.SaveVersionJson(ret);
+            }
+            else
+            {
+                //出错了，使用cache
+                try
+                {
+                    ret = HTEditorCache.Instance.LoadVersionJson<T>();
+                    err = null;
+                    Debug.LogWarning("数据获取出错，使用缓存数据。");
+                }
+                catch (Exception)
+                {
+                }
+            }
             callback?.Invoke(ret, err);
         }
     }

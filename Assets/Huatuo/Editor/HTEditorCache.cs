@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,6 +24,12 @@ namespace Huatuo.Editor
         private int m_counter;
         private int m_nSuccessCount;
         private int m_nFailedCount;
+        private Dictionary<Type, string> m_dictCacheName = new Dictionary<Type, string>
+        {
+            [typeof(RemoteConfig)] = $"{nameof(RemoteConfig)}.json",
+            [typeof(ItemSerial<TagItem>)] = $"{nameof(TagItem)}.json",
+            [typeof(ItemSerial<CommitItem>)] = $"{nameof(CommitItem)}.json",
+        };
 
         private static HTEditorCache instance = null;
 
@@ -53,6 +61,22 @@ namespace Huatuo.Editor
             m_counter = 0;
             m_nSuccessCount = 0;
             m_nFailedCount = 0;
+        }
+        public void SaveVersionJson<T>(T data)
+        {
+            var fileName = m_dictCacheName[typeof(T)];
+            File.WriteAllText(Path.Combine(CacheBasePath, fileName), JsonUtility.ToJson(data, true), Encoding.UTF8);
+        }
+        public T LoadVersionJson<T>()
+        {
+            var fileName = m_dictCacheName[typeof(T)];
+            var txt = File.ReadAllText(Path.Combine(CacheBasePath, fileName));
+            if (string.IsNullOrEmpty(txt))
+            {
+                throw new Exception("no cache data");
+            }
+
+            return JsonUtility.FromJson<T>(txt);
         }
 
         public bool DownloadDone()
