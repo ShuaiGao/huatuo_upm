@@ -82,6 +82,7 @@ namespace Huatuo.Editor
         public List<string> il2cpp_version;
         public string il2cpp_recommend_version;
         public string huatuo_recommend_version;
+        public string huatuo_recommend_version_sha;
         public string huatuo_min_version;
         
         public HuatuoRemoteConfig(RemoteConfig rc)
@@ -91,6 +92,13 @@ namespace Huatuo.Editor
             InitHuatuoVersion(rc);
             InitIl2CppVersion(rc);
             InitIl2CppRecommendVersion(rc);
+        }
+        public void SetHuaTuoTagSha(string sha)
+        {
+            if(sha != null&& sha.Length > 10)
+            {
+                huatuo_recommend_version_sha = sha.Substring(0, 6);
+            }
         }
         
         private bool BigThanMinVersion(string version, string minVersion)

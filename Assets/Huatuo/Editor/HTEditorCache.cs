@@ -249,6 +249,10 @@ namespace Huatuo.Editor
             if (downloadErr)
             {
                 m_nFailedCount++;
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
             }
             else
             {

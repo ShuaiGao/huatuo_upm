@@ -259,159 +259,6 @@ namespace Huatuo.Editor
             ReloadVersion();
         }
 
-        /*
-        private IEnumerator Upgrading()
-        {
-            var itor = GetSdkVersions(true, null);
-            while (itor.MoveNext())
-            {
-                yield return itor.Current;
-            }
-
-            ReloadVersion();
-
-            var haserr = false;
-            do
-            {
-                if (m_bHasHuatuo)
-                {
-                    EnableOrDisable(false);
-                }
-
-                //local url temp hash unzippath, versionstr
-                var needDownload =
-                    new Dictionary<string, (string url, string tmpfile, string hash, string unzipPath, string verstr)
-                    >();
-                //if (!m_remoteConfig.Compare(m_verHuatuo_il2cpp))
-                //{
-                //    var il2cpp_version = m_remoteConfig.GetIl2cppRecommendVersion();
-                //    needDownload.Add(Config.HuatuoIL2CPPBackPath,
-                //        ($"{Config.IL2CPPManifestUrl}/{il2cpp_version}.zip",
-                //            $"{Config.DownloadCache}/{il2cpp_version}.zip", m_remoteVerHuatuoIl2Cpp.hash,
-                //            $"{Config.DownloadCache}/{il2cpp_version}_dir",
-                //            JsonUtility.ToJson(m_remoteVerHuatuoIl2Cpp)));
-                //}
-                //if (!m_remoteVerHuatuo.Compare(m_verHuatuo))
-                //{
-                //    needDownload.Add(Config.HuatuoBackPath,
-                //        ($"{Config.HuatuoManifestUrl}/{m_remoteVerHuatuo.ver}.zip",
-                //            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}.zip", m_remoteVerHuatuo.hash,
-                //            $"{Config.DownloadCache}/huatuo_{m_remoteVerHuatuo.ver}_dir",
-                //            JsonUtility.ToJson(m_remoteVerHuatuo)));
-                //}
-
-                var downloading = 0;
-                foreach (var kv in needDownload)
-                {
-                    downloading++;
-                    itor = HTEditorUtility.DownloadFile(kv.Value.url, kv.Value.tmpfile,
-                        p => { EditorUtility.DisplayProgressBar("下载中...", $"{downloading}/{needDownload.Count}", p); },
-                        ret =>
-                        {
-                            if (!string.IsNullOrEmpty(ret))
-                            {
-                                haserr = true;
-                                EditorUtility.DisplayDialog("错误", $"下载{kv.Value.Item1}出错.\n{ret}", "ok");
-                            }
-                        });
-                    while (itor.MoveNext())
-                    {
-                        yield return itor.Current;
-                    }
-
-                    if (haserr)
-                    {
-                        break;
-                    }
-                }
-
-                if (haserr)
-                {
-                    break;
-                }
-
-                var unzipCnt = 0;
-                //check files
-                foreach (var kv in needDownload)
-                {
-                    unzipCnt++;
-                    if (!File.Exists(kv.Value.tmpfile))
-                    {
-                        EditorUtility.DisplayDialog("错误", $"下载的文件{kv.Value.tmpfile}不存在", "ok");
-                    }
-                    else if (MD5.ComputeFileMD5(kv.Value.tmpfile).ToLower() != kv.Value.hash)
-                    {
-                        EditorUtility.DisplayDialog("错误", $"下载的文件{kv.Value.tmpfile} hash不匹配，请重新下载", "ok");
-                    }
-                    else
-                    {
-                        var cnt = 0;
-                        itor = HTEditorUtility.UnzipAsync(kv.Value.tmpfile, kv.Value.unzipPath, b => { cnt = b; }, p =>
-                        {
-                            EditorUtility.DisplayProgressBar($"解压中...{unzipCnt}/{needDownload.Count}", $"{p}/{cnt}",
-                                (float)p / cnt);
-                        }, () => { }, () => { haserr = true; });
-                        while (itor.MoveNext())
-                        {
-                            yield return itor.Current;
-                        }
-                    }
-                }
-
-                if (haserr)
-                {
-                    break;
-                }
-
-                foreach (var kv in needDownload)
-                {
-                    if (Directory.Exists(kv.Key))
-                    {
-                        Directory.Delete(kv.Key, true);
-                    }
-
-                    var err = HTEditorUtility.Mv(kv.Value.unzipPath, kv.Key);
-                    if (!string.IsNullOrEmpty(err))
-                    {
-                        Debug.LogError(err);
-                        haserr = true;
-                    }
-
-                    File.WriteAllText(kv.Key + "/version.json", kv.Value.verstr);
-                }
-
-                if (haserr)
-                {
-                    break;
-                }
-
-                foreach (var val in needDownload.Values)
-                {
-                    if (File.Exists(val.tmpfile))
-                    {
-                        File.Delete(val.tmpfile);
-                    }
-                }
-
-                itor = GetSdkVersions(true, null);
-                while (itor.MoveNext())
-                {
-                    yield return itor.Current;
-                }
-
-                EnableOrDisable(true);
-            } while (false);
-
-            EditorUtility.ClearProgressBar();
-
-            if (haserr)
-            {
-                EditorUtility.DisplayDialog("错误", "发生了一些错误，请看log!", "ok");
-            }
-
-            m_corUpgrade = null;
-        }
-*/
         /// <summary>
         /// 对Huatuo环境进行检查
         /// </summary>
@@ -451,7 +298,7 @@ namespace Huatuo.Editor
                 GUILayout.BeginHorizontal();
                 GUILayout.Label($"缓存路径:", m_styleNormalFont, GUILayout.Width(65));
                 GUILayout.TextField(HTEditorCache.Instance.CacheBasePath);
-                if (GUILayout.Button("修改缓存路径", m_styleNormalBtn, GUILayout.Width(150)))
+                if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
                 {
                     var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorCache.Instance.CacheBasePath, "");
                     if (cachePath.Length == 0)
@@ -464,8 +311,11 @@ namespace Huatuo.Editor
                         EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
                         return;
                     }
-
                     HTEditorCache.Instance.SetCacheDirectory(cachePath);
+                }
+                if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
+                {
+                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath+"/");
                 }
 
                 GUILayout.EndHorizontal();
@@ -534,7 +384,7 @@ namespace Huatuo.Editor
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(
-                    $"推荐版本:\tHuatuo: {m_remoteConfig.huatuo_recommend_version}\tIL2CPP: {m_remoteConfig.il2cpp_recommend_version}",
+                    $"推荐版本:\tHuatuo: {m_remoteConfig.huatuo_recommend_version}[{m_remoteConfig.huatuo_recommend_version_sha}]\tIL2CPP: {m_remoteConfig.il2cpp_recommend_version}",
                     m_styleNormalFont);
 
                 if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
@@ -666,6 +516,7 @@ namespace Huatuo.Editor
                     }
 
                     m_corFetchManifest = null;
+                    InitHuatuoTagSha();
                 }));
 
             this.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<CommitItem>>(HTEditorConfig.urlHuatuoCommits,
@@ -704,7 +555,33 @@ namespace Huatuo.Editor
 
                     this.m_tags = tagList;
                     Debug.Log($"tags: {tagList}");
+                    InitHuatuoTagSha();
                 }));
+        }
+        private void InitHuatuoTagSha()
+        {
+            if(m_remoteConfig == null || m_tags == null)
+            {
+                return;
+            }
+            foreach (var item in this.m_tags)
+            {
+                if(item.name == m_remoteConfig.huatuo_recommend_version)
+                {
+                    m_remoteConfig.SetHuaTuoTagSha(item.commit.sha);
+                }
+            }
+        }
+        private string GetHuatuoTagSha(string tag)
+        {
+            foreach (var item in this.m_tags)
+            {
+                if (item.name == tag)
+                {
+                    return item.commit.sha;
+                }
+            }
+            return "";
         }
 
         private void OnGUI()
