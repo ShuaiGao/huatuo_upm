@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Huatuo.Editor.ThirdPart.ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Win32;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,6 +18,66 @@ namespace Huatuo.Editor
     /// </summary>
     public static class HTEditorUtility
     {
+        private static RegistryKey OpenRegistryKey(RegistryKey root, string str)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                str = str.Remove(0, 1) + @"/";
+                while (str.IndexOf('/') != -1)
+                {
+                    if (root == null)
+                    {
+                        return null;
+                    }
+
+                    root = root.OpenSubKey(str.Substring(0, str.IndexOf('/')));
+                    str = str.Remove(0, str.IndexOf('/') + 1);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                root = null;
+            }
+
+            return root;
+        }
+
+        public static string GetAppDataPath()
+        {
+            var rkRoot = OpenRegistryKey(Registry.CurrentUser,
+                @"/software/microsoft/windows/currentversion/explorer/shell folders");
+            if (rkRoot == null)
+            {
+                return string.Empty;
+            }
+
+            var strDataPath = rkRoot.GetValue("AppData").ToString();
+            if (string.IsNullOrEmpty(strDataPath) || !Directory.Exists(strDataPath))
+            {
+                return string.Empty;
+            }
+
+            return strDataPath;
+        }
+
+        public static void EnsureFilePath(string filePath)
+        {
+            var path = Path.GetDirectoryName(filePath);
+            if (Directory.Exists(path))
+            {
+                return;
+            }
+            
+            var di = new DirectoryInfo(path);
+            di.Create();
+        }
+        
         /// <summary>
         /// Compares two versions to see which is greater.
         /// </summary>

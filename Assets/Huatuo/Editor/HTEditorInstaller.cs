@@ -28,10 +28,6 @@ namespace Huatuo.Editor
             }
         }
 
-        HTEditorInstaller()
-        {
-        }
-
         public void Init()
         {
             if (File.Exists(HTEditorConfig.HuatuoVersionPath))
@@ -45,6 +41,69 @@ namespace Huatuo.Editor
             }
 
             HTEditorCache.Instance.SetCacheDirectory(m_HuatuoVersion.CacheDir);
+        }
+
+        public void Prepare(Action<bool> callback)
+        {
+            var ret = true;
+            try
+            {
+                EditorUtility.DisplayProgressBar("初始化", "初始化基础环境", 0f);
+                HTEditorConfig.Init();
+
+                if (!Directory.Exists(HTEditorConfig.HuatuoHelperPath))
+                {
+                    Directory.CreateDirectory(HTEditorConfig.HuatuoHelperPath);
+                }
+
+                var il2CppPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "il2cpp");
+                if (!Directory.Exists(il2CppPath))
+                {
+                    HTEditorUtility.CopyFilesRecursively(HTEditorConfig.Il2cppPath, il2CppPath);
+                }
+
+                var monoBleedingPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "MonoBleedingEdge");
+                if (!Directory.Exists(monoBleedingPath))
+                {
+                    HTEditorUtility.CopyFilesRecursively(HTEditorConfig.MonoBleedingEdgePath, monoBleedingPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                ret = false;
+                Debug.LogException(ex);
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+                callback?.Invoke(ret);
+            }
+        }
+
+        public void CheckHuatuo(Action<string> callback)
+        {
+            var il2CppPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "il2cpp");
+            if (!Directory.Exists(il2CppPath))
+            {
+                callback?.Invoke($"[CheckHuatuo] {il2CppPath} not exists!");
+                return;
+            }
+
+            var libil2CppPath = Path.Combine(il2CppPath, "libil2cpp");
+            if (!Directory.Exists(il2CppPath))
+            {
+                callback?.Invoke($"[CheckHuatuo] {libil2CppPath} not exists!");
+                return;
+            }
+            
+            var huatuoPath = Path.Combine(libil2CppPath, "huatuo");
+            if (!Directory.Exists(huatuoPath))
+            {
+                callback?.Invoke($"[CheckHuatuo] {huatuoPath} not exists!");
+                return;
+            }
+            
+            callback?.Invoke("");
         }
 
         public void DoUninstall()
