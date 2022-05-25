@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HuatuoLogoMat
-  m_Shader: {fileID: 4800000, guid: 7c16867ea3ee15e4aa24f38d64e652d9, type: 3}
+  m_Shader: {fileID: 4800000, guid: 162fe242d486f4dab90ed53db15b9c19, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -78,11 +78,11 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Drop1: {r: 0.8085835, g: 2.9347823, b: 0.51987803, a: 0}
-    - _Drop2: {r: 0, g: 0, b: 1002.1177, a: 0}
-    - _Drop3: {r: 0, g: 0, b: 1002.1177, a: 0}
+    - _Drop1: {r: 0.95095813, g: 1.4639741, b: 1.0858948, a: 0}
+    - _Drop2: {r: 0, g: 0, b: 1002.68176, a: 0}
+    - _Drop3: {r: 0, g: 0, b: 1002.68176, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Params1: {r: 4, g: 1, b: 0.9463226, a: 0}
-    - _Params2: {r: 1, g: 0.25, b: 0.27655897, a: 0.38504878}
-    - _Reflection: {r: 0.28201872, g: 0.28201872, b: 0.28201872, a: 0.56403744}
+    - _Params1: {r: 4, g: 1, b: 0.5897645, a: 0}
+    - _Params2: {r: 1, g: 0.25, b: 0.2613539, a: 0.6194117}
+    - _Reflection: {r: 0.4185801, g: 0.4185801, b: 0.4185801, a: 0.8371602}
   m_BuildTextureStacks: []
