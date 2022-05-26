@@ -1,5 +1,6 @@
 # huatuo_upm
-[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)[![openupm](https://img.shields.io/npm/v/com.focus-creative-games.huatuo?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.focus-creative-games.huatuo/)
+
 
 huatuo_upm 是一个 unity 工具包的源码仓库。
 
