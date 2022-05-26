@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEditor;
@@ -22,6 +23,8 @@ namespace Huatuo.Editor
         private RippleEffect _rippleEffect = null;
 
         private EditorWindow _window = null;
+
+        private bool _focused = true;
 
         private void InitImage(Vector2 winSize)
         {
@@ -74,6 +77,14 @@ namespace Huatuo.Editor
             EditorApplication.update += Update;
         }
 
+        public void Init(Vector2 winSize, EditorWindow window)
+        {
+            _window = window;
+            InitImage(winSize);
+            InitMat();
+
+        }
+
         public void Destroy()
         {
             EditorApplication.update -= Update;
@@ -85,15 +96,14 @@ namespace Huatuo.Editor
 
         private void Update()
         {
+            _focused = UnityEditorInternal.InternalEditorUtility.isApplicationActive;
+            if (!_focused)
+            {
+                return;
+            }
+
             _rippleEffect?.Update();
             _window?.Repaint();
-        }
-
-        public void Init(Vector2 winSize, EditorWindow window)
-        {
-            _window = window;
-            InitImage(winSize);
-            InitMat();
         }
 
         public void OnGUI()
@@ -103,7 +113,7 @@ namespace Huatuo.Editor
                 return;
             }
 
-            Graphics.DrawTexture(_rtImage, _logoImage, _currentMaterial);
+            Graphics.DrawTexture(_rtImage, _logoImage, _focused ? _currentMaterial : null);
         }
     }
 }
