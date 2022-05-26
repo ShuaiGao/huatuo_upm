@@ -18,18 +18,18 @@ namespace Huatuo.Editor.BuildPipeline
     /// <summary>
     /// 这个类是Huatuo的BuildPipeline，用于在导出项目的时候对Huatuo进行相关的资源支持
     /// </summary>
-    public class HtBuildPipeline : IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
+    public class HtBuildPipeline/* : IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
         IPostBuildPlayerScriptDLLs, IIl2CppProcessor, IUnityLinkerProcessor,
 #if UNITY_ANDROID
         IPostGenerateGradleAndroidProject,
 #endif
-        IPostprocessBuildWithReport
+        IPostprocessBuildWithReport*/
     {
         public int callbackOrder => 1;
 
         private static MethodInfo _sBuildReportAddMessage = null;
 
-        int IOrderedCallback.callbackOrder => 0;
+        // int IOrderedCallback.callbackOrder => 0;
 
         public void OnPreprocessBuild(BuildReport report)
         {

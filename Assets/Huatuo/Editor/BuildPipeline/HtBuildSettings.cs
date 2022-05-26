@@ -11,7 +11,7 @@ namespace Huatuo.Editor.BuildPipeline
     {
         private static readonly string DefaultAssetPath = "Assets/Huatuo/Editor/Resources/BuildSettings.asset";
 
-        [HideInInspector] public bool Enable = true;
+        [HideInInspector] public bool Enable = false;
         [HideInInspector] public string HuatuoVersion = "";
         [HideInInspector] public string HuatuoIl2CPPVersion = "";
         [HideInInspector] public string HuatuoHelperPath = "";
