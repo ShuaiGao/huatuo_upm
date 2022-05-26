@@ -16,10 +16,16 @@ namespace Huatuo.Editor
         public long Timestamp;
         public string CacheDir;
     }
-    
+    internal struct MultiHuatuoVersion
+    {
+        public Dictionary<string, HuatuoVersion> data;
+        public string HuatuoPath;
+    }
+
     internal struct InstallVersion
     {
         public EFILE_NAME huatuoType;
+        public EFILE_NAME il2cppType;
         public string il2cppTag;
         public string huatuoTag;
     }
@@ -93,14 +99,22 @@ namespace Huatuo.Editor
             InitIl2CppVersion(rc);
             InitIl2CppRecommendVersion(rc);
         }
-        public void SetHuaTuoTagSha(string sha)
+        public void InitRecommendTagSha()
         {
-            if(sha != null&& sha.Length > 10)
+/*            if(sha != null&& sha.Length > 10)
             {
-                huatuo_recommend_version_sha = sha.Substring(0, 6);
+                huatuo_recommend_version_sha = sha;
             }
+            ret.Add($"head[{}]");
+            foreach (var item in this.m_tags)
+            {
+                if (item.name == m_remoteConfig.huatuo_recommend_version)
+                {
+                    m_remoteConfig.InitRecommendTagSha(item.commit.sha);
+                }
+            }*/
         }
-        
+
         private bool BigThanMinVersion(string version, string minVersion)
         {
             var a = version.Split('.');
@@ -135,6 +149,7 @@ namespace Huatuo.Editor
                     ret.Add(item);
                 }
             }
+            ret.Add(HTEditorConfig.HEAD);
             huatuo_version = ret;
         }
         

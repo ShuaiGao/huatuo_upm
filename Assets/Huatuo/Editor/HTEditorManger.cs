@@ -20,7 +20,7 @@ namespace Huatuo.Editor
 
         private bool m_bInitialized = false;
         private bool m_bHasIl2cpp = false;
-        private bool m_bVersionUnsported = false;
+        internal bool m_bVersionUnsported = false;
         private bool m_bUnsportedC = false;
         private bool m_bShowOtherVersion = false;
 
@@ -29,17 +29,15 @@ namespace Huatuo.Editor
         private GUIStyle m_styleNormalBtn = null;
         private GUIStyle m_styleFooterBtn = null;
 
-        private EditorCoroutines.EditorCoroutine m_corFetchManifest = null;
+
         private EditorCoroutines.EditorCoroutine m_corUpgrade = null;
-        private HuatuoRemoteConfig m_remoteConfig = null;
-        private List<CommitItem> m_commits = null;
-        private List<TagItem> m_tags = null;
+        private HTEditorModel m_Model = null;
 
         //选择安装其他版本时，缓存下拉框值
-        private int m_nSelectedhuatuoVersionIndex = 0;
-        private int m_nSelectedil2cppVersionIndex = 0;
+        internal int m_nSelectedhuatuoVersionIndex = 0;
+        internal int m_nSelectedil2cppVersionIndex = 0;
 
-        private bool busying => m_corUpgrade != null || m_corFetchManifest != null;
+        private bool busying => m_corUpgrade != null || m_Model.IsBusy();
 
         private void OnEnable()
         {
@@ -47,6 +45,7 @@ namespace Huatuo.Editor
 
             Init();
         }
+
 
         /// <summary>
         /// 检查给定目录下是否有Huatuo的版本文件
@@ -90,9 +89,10 @@ namespace Huatuo.Editor
             {
                 return;
             }
+            m_Model = HTEditorModel.Instance;
+            m_Model.Manager = this;
 
             EditorUtility.ClearProgressBar();
-
             HTEditorConfig.Init();
 
             m_logo = new HTLogo();
@@ -191,6 +191,11 @@ namespace Huatuo.Editor
                 return;
             }
 
+            if (version.huatuoTag.StartsWith(HTEditorConfig.HEAD))
+            {
+                version.huatuoType = EFILE_NAME.HUATUO_MAIN;
+            }
+
             if (version.huatuoType == EFILE_NAME.HUATUO_MAIN)
             {
                 m_corUpgrade = this.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<CommitItem>>(
@@ -209,18 +214,13 @@ namespace Huatuo.Editor
                         }
                         else
                         {
-                            this.m_commits = logList;
-                            version.huatuoTag = this.m_commits[0].GetShaShort();
+                            version.huatuoTag = logList[0].GetShaShort();
                             m_corUpgrade = this.StartCoroutine(Install(version));
                         }
 
                         Debug.Log($"commit logs: {logList}");
                     })
                 );
-            }
-            else
-            {
-                m_corUpgrade = this.StartCoroutine(Install(version));
             }
         }
 
@@ -315,19 +315,19 @@ namespace Huatuo.Editor
                 }
                 if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
                 {
-                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath+"/");
+                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath + "/");
                 }
 
                 GUILayout.EndHorizontal();
             }
 
-
+            var recommend = m_Model.GetRecommendVersion(false);
             var strMsg = "";
             var strColor = "<color=green>";
             var installVersion = HTEditorInstaller.Instance.m_HuatuoVersion;
             if (installVersion.HuatuoTag?.Length > 0)
             {
-                if (installVersion.HuatuoTag != m_remoteConfig?.huatuo_recommend_version)
+                if (installVersion.HuatuoTag != recommend.huatuoTag && $"{HTEditorConfig.HEAD}[{installVersion.HuatuoTag}]" != recommend.huatuoTag)
                 {
                     strMsg = $"<color=red>Huatuo: {installVersion.HuatuoTag}</color>\t";
                 }
@@ -336,7 +336,7 @@ namespace Huatuo.Editor
                     strMsg = $"Huatuo: {installVersion.HuatuoTag}\t";
                 }
 
-                if (installVersion.Il2cppTag != m_remoteConfig?.il2cpp_recommend_version)
+                if (installVersion.Il2cppTag != recommend.il2cppTag)
                 {
                     strMsg = strMsg + $"<color=red>IL2CPP: {installVersion.Il2cppTag}</color>";
                 }
@@ -375,45 +375,35 @@ namespace Huatuo.Editor
 
             GUILayout.EndHorizontal();
 
-            if (m_corFetchManifest != null)
+            if (m_Model.IsBusy())
             {
                 GUILayout.Label("正在获取配置文件...", m_styleNormalFont);
+                return;
             }
 
-            if (m_remoteConfig != null)
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"推荐版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppTag}", m_styleNormalFont);
+
+            if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(
-                    $"推荐版本:\tHuatuo: {m_remoteConfig.huatuo_recommend_version}[{m_remoteConfig.huatuo_recommend_version_sha}]\tIL2CPP: {m_remoteConfig.il2cpp_recommend_version}",
-                    m_styleNormalFont);
-
-                if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
-                {
-                    var version = new InstallVersion()
-                    {
-                        huatuoType = EFILE_NAME.HUATUO,
-                        huatuoTag = m_remoteConfig.huatuo_recommend_version,
-                        il2cppTag = m_remoteConfig.il2cpp_recommend_version
-                    };
-                    Upgrade(version);
-                }
-
-                if (GUILayout.Button("其它版本", m_styleNormalBtn, GUILayout.Width(70)))
-                {
-                    m_bShowOtherVersion = !m_bShowOtherVersion;
-                }
-
-                GUILayout.EndHorizontal();
+                Upgrade(m_Model.GetRecommendVersion(false));
             }
+
+            if (GUILayout.Button("其它版本", m_styleNormalBtn, GUILayout.Width(70)))
+            {
+                m_bShowOtherVersion = !m_bShowOtherVersion;
+            }
+
+            GUILayout.EndHorizontal();
 
             if (m_bShowOtherVersion)
             {
                 GUILayout.BeginArea(new Rect(140, 320, 300, 400));
                 GUILayout.BeginVertical();
                 m_nSelectedhuatuoVersionIndex = EditorGUILayout.Popup("huatuo:", m_nSelectedhuatuoVersionIndex,
-                    m_remoteConfig.huatuo_version.ToArray());
+                    m_Model.GetHuatuoVersions().ToArray());
                 m_nSelectedil2cppVersionIndex = EditorGUILayout.Popup("IL2CPP: ", m_nSelectedil2cppVersionIndex,
-                    m_remoteConfig.il2cpp_version.ToArray());
+                    m_Model.GetIl2cppVersions().ToArray());
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("取消", m_styleNormalBtn))
                 {
@@ -425,8 +415,8 @@ namespace Huatuo.Editor
                     var version = new InstallVersion()
                     {
                         huatuoType = EFILE_NAME.HUATUO,
-                        huatuoTag = m_remoteConfig.huatuo_version[m_nSelectedhuatuoVersionIndex],
-                        il2cppTag = m_remoteConfig.il2cpp_version[m_nSelectedil2cppVersionIndex]
+                        huatuoTag = m_Model.GetHuatuoVersions()[m_nSelectedhuatuoVersionIndex],
+                        il2cppTag = m_Model.GetIl2cppVersions()[m_nSelectedil2cppVersionIndex]
                     };
                     Upgrade(version);
                     m_bShowOtherVersion = false;
@@ -456,12 +446,7 @@ namespace Huatuo.Editor
 
             if (GUILayout.Button("安装最新版本", m_styleFooterBtn))
             {
-                var version = new InstallVersion()
-                {
-                    huatuoType = EFILE_NAME.HUATUO_MAIN,
-                    il2cppTag = m_remoteConfig.il2cpp_recommend_version
-                };
-                Upgrade(version);
+                Upgrade(m_Model.GetRecommendVersion(false));
             }
 
             GUILayout.EndHorizontal();
@@ -475,113 +460,7 @@ namespace Huatuo.Editor
             }
 
             ReloadVersion();
-            fetchData();
-        }
-
-        private void fetchData()
-        {
-            if (m_corFetchManifest != null)
-            {
-                this.StopCoroutine(m_corFetchManifest.routine);
-                m_corFetchManifest = null;
-            }
-
-            m_corFetchManifest = this.StartCoroutine(HTEditorUtility.HttpRequest<RemoteConfig>(
-                HTEditorConfig.urlVersionConfig, (config, err) =>
-                {
-                    if (string.IsNullOrEmpty(config.huatuo_recommend_version))
-                    {
-                        Debug.LogError("Unable to retrieve remote config.");
-                        err = $"【3】获取远程版本信息错误。";
-                    }
-
-                    if (!config.Equals(default(RemoteConfig)))
-                    {
-                        m_remoteConfig = new HuatuoRemoteConfig(config);
-                        if (!m_remoteConfig.unity_version.Contains(HTEditorConfig.UnityVersionDigits))
-                        {
-                            m_bVersionUnsported = true;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(err))
-                    {
-                        EditorUtility.DisplayDialog("错误", err, "ok");
-                    }
-
-                    if (m_remoteConfig != null)
-                    {
-                        Debug.Log($"huatuo version: {m_remoteConfig.huatuo_recommend_version}");
-                        Debug.Log($"il2cpp version: {m_remoteConfig.il2cpp_recommend_version}");
-                    }
-
-                    m_corFetchManifest = null;
-                    InitHuatuoTagSha();
-                }));
-
-            this.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<CommitItem>>(HTEditorConfig.urlHuatuoCommits,
-                (itemSerial, err) =>
-                {
-                    var logList = itemSerial.items;
-                    if (logList == null || logList.Count == 0)
-                    {
-                        Debug.LogError("Unable to retrieve commit logs.");
-                        err = $"【3】获取logs失败。";
-                    }
-
-                    if (!string.IsNullOrEmpty(err))
-                    {
-                        EditorUtility.DisplayDialog("错误", err, "ok");
-                    }
-
-                    this.m_commits = logList;
-                    Debug.Log($"commit logs: {logList}");
-                }));
-
-            this.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<TagItem>>(HTEditorConfig.urlHuatuoTags,
-                (itemSerial, err) =>
-                {
-                    var tagList = itemSerial.items;
-                    if (tagList == null || tagList.Count == 0)
-                    {
-                        Debug.LogError("Unable to retrieve tags.");
-                        err = $"【3】获取tags失败。";
-                    }
-
-                    if (!string.IsNullOrEmpty(err))
-                    {
-                        EditorUtility.DisplayDialog("错误", err, "ok");
-                    }
-
-                    this.m_tags = tagList;
-                    Debug.Log($"tags: {tagList}");
-                    InitHuatuoTagSha();
-                }));
-        }
-        private void InitHuatuoTagSha()
-        {
-            if(m_remoteConfig == null || m_tags == null)
-            {
-                return;
-            }
-            foreach (var item in this.m_tags)
-            {
-                if(item.name == m_remoteConfig.huatuo_recommend_version)
-                {
-                    m_remoteConfig.SetHuaTuoTagSha(item.commit.sha);
-                }
-            }
-        }
-        private string GetHuatuoTagSha(string tag)
-        {
-            foreach (var item in this.m_tags)
-            {
-                if (item.name == tag)
-                {
-                    return item.commit.sha;
-                }
-            }
-            return "";
+            m_Model.fetchData();
         }
 
         private void OnGUI()

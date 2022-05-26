@@ -14,6 +14,7 @@ namespace Huatuo.Editor
     {
         public static string UnityFullVersion = "";
         public static string UnityVersionDigits = "";
+        public static string HEAD = "head";
 
         //public static readonly string libil2cppPrefixGitee = "https://gitee.com/juvenior/il2cpp_huatuo/repository/archive";
         //public static readonly string libil2cppPrefixGithub = "https://github.com/pirunxi/il2cpp_huatuo/archive/refs/heads";
@@ -53,7 +54,7 @@ namespace Huatuo.Editor
         public static string DownloadCache = "";
 
         public static string HuatuoVersionPath =
-            Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
+         Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, ".huatuo");
 
         public static string HuatuoHelperPath = "";
 
@@ -66,6 +67,7 @@ namespace Huatuo.Editor
                 .GetFullPath(Path.Combine(HTEditorUtility.GetAppDataPath(), ".huatuo", UnityVersionDigits))
                 .Replace('\\', '/');
             HTEditorUtility.EnsureFilePath(HuatuoHelperPath);
+            //HuatuoVersionPath =Path.Combine(HuatuoHelperPath, "version.json");
         }
     }
 }
