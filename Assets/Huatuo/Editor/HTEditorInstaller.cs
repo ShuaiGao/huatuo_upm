@@ -195,12 +195,13 @@ namespace Huatuo.Editor
 
         private IEnumerator Extract(Action<bool> callback)
         {
-            var il2cppZip = HTEditorCache.Instance.GetZipPath(EFILE_NAME.IL2CPP, m_InstallVersion.il2cppTag);
-            var huatuozip = HTEditorCache.Instance.GetZipPath(m_InstallVersion.huatuoType, m_InstallVersion.huatuoTag);
+            var il2cppZip = HTEditorCache.Instance.GetZipPath(m_InstallVersion.il2cppType, m_InstallVersion);
+            var huatuozip = HTEditorCache.Instance.GetZipPath(m_InstallVersion.huatuoType, m_InstallVersion);
+            var il2cppExtractTo = Path.GetFileNameWithoutExtension(il2cppZip);
+            var huatuoExtractTo = Path.GetFileNameWithoutExtension(huatuozip);
 
-            var il2cppCachePath = Path.GetDirectoryName(il2cppZip) + $"/il2cpp_huatuo-{m_InstallVersion.il2cppTag}";
-            var huatuoCachePath = Path.GetDirectoryName(huatuozip) + $"/huatuo-{m_InstallVersion.huatuoTag}";
-
+            var il2cppCachePath = Path.Combine(Path.GetDirectoryName(il2cppZip), il2cppExtractTo);
+            var huatuoCachePath = Path.Combine(Path.GetDirectoryName(huatuozip), huatuoExtractTo);
             var cnt = 0;
             var haserr = false;
             var itor = HTEditorUtility.UnzipAsync(il2cppZip, il2cppCachePath, b => { cnt = b; },
@@ -211,7 +212,6 @@ namespace Huatuo.Editor
                 yield return itor.Current;
             }
             EditorUtility.ClearProgressBar();
-
             if (haserr)
             {
                 callback?.Invoke(true);
@@ -228,15 +228,15 @@ namespace Huatuo.Editor
             }
 
             EditorUtility.ClearProgressBar();
-            
             if (haserr)
             {
                 callback?.Invoke(true);
                 yield break;
             }
 
-            var il2cppDirName = il2cppCachePath + $"/il2cpp_huatuo-{m_InstallVersion.il2cppTag}/libil2cpp";
-            var huatuoDirName = huatuoCachePath + HTEditorCache.GetHuatuoZipInnerFolder(m_InstallVersion.huatuoType, m_InstallVersion.huatuoTag);
+            var il2cppDirName = Path.Combine(il2cppCachePath, HTEditorCache.GetZipInnerFolder(m_InstallVersion.il2cppType, m_InstallVersion));
+            var huatuoDirName = Path.Combine(huatuoCachePath, HTEditorCache.GetZipInnerFolder(m_InstallVersion.huatuoType, m_InstallVersion));
+
             if (!Directory.Exists(il2cppDirName))
             {
                 Debug.LogError($"{il2cppDirName} not exists!!!");
@@ -397,75 +397,6 @@ namespace Huatuo.Editor
             File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(m_HuatuoVersion, true),
                 Encoding.UTF8);
         }
-
-        /*
-        public static HuatuoRemoteConfig GetVersionData()
-        {
-            var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
-            return JsonUtility.FromJson<HuatuoRemoteConfig>(data);
-        }
-
-        public static bool Extract(string zipPath, string extractDir, string installPath)
-        {
-            var result = ExtractZip(zipPath, extractDir, installPath);
-            return result.Count > 0;
-        }
-
-        public static List<string> ExtractZip(string zipFilePath, string relativePath, string destPath)
-        {
-            var result = new List<string>();
-
-            relativePath = relativePath.Replace(@"\", @"/");
-
-            using (FileStream zipToOpen = new FileStream(zipFilePath, FileMode.Open))
-            {
-                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Read))
-                {
-                    var entry = archive.Entries.FirstOrDefault(x => x.FullName.ToUpper() == relativePath.ToUpper());
-                    if (entry == null)
-                        entry = archive.Entries.FirstOrDefault(x =>
-                            x.FullName.ToUpper() == (relativePath + "/").ToUpper());
-
-                    if (!string.IsNullOrWhiteSpace(entry.Name))
-                    {
-                        var path = Path.Combine(destPath, entry.Name);
-                        using (var file = new FileStream(path, FileMode.Create, FileAccess.Write))
-                        {
-                            entry.Open().CopyTo(file);
-                            file.Close();
-                        }
-
-                        result.Add(path);
-                    }
-                    else
-                    {
-                        var items = archive.Entries.Where(x => x.FullName.StartsWith(entry.FullName)).ToList();
-                        foreach (var item in items.Where(x => string.IsNullOrWhiteSpace(x.Name)).OrderBy(x => x.Length))
-                        {
-                            var path = Path.Combine(destPath, item.FullName.Substring(entry.FullName.Length));
-                            if (!Directory.Exists(path))
-                                Directory.CreateDirectory(path);
-                        }
-
-                        foreach (var item in items.Where(x => !string.IsNullOrWhiteSpace(x.Name))
-                            .OrderBy(x => x.Length))
-                        {
-                            var path = new FileInfo(Path.Combine(destPath,
-                                item.FullName.Substring(entry.FullName.Length))).Directory.FullName;
-                            path = Path.Combine(path, item.Name);
-                            using (var file = new FileStream(path, FileMode.Create, FileAccess.Write))
-                            {
-                                item.Open().CopyTo(file);
-                                file.Close();
-                            }
-
-                            result.Add(path);
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }*/
+        
     }
 }

@@ -222,18 +222,22 @@ namespace Huatuo.Editor
                     })
                 );
             }
+            else
+            {
+                m_corUpgrade = this.StartCoroutine(Install(version));
+            }
         }
 
         private IEnumerator Install(InstallVersion version)
         {
             HTEditorCache.Instance.SetDownloadCount(2);
-            var itor = HTEditorCache.Instance.GetCache(version.huatuoType, version.huatuoTag, "");
+            var itor = HTEditorCache.Instance.GetCache(version.huatuoType, version, "");
             while (itor.MoveNext())
             {
                 yield return itor.Current;
             }
 
-            itor = HTEditorCache.Instance.GetCache(EFILE_NAME.IL2CPP, version.il2cppTag, "");
+            itor = HTEditorCache.Instance.GetCache(version.il2cppType, version, "");
             while (itor.MoveNext())
             {
                 yield return itor.Current;
@@ -315,7 +319,7 @@ namespace Huatuo.Editor
                 }
                 if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
                 {
-                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath + "/");
+                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath);
                 }
 
                 GUILayout.EndHorizontal();
@@ -382,7 +386,15 @@ namespace Huatuo.Editor
             }
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"推荐版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppTag}", m_styleNormalFont);
+            if (String.IsNullOrEmpty(recommend.il2cppBranch))
+            {
+                GUILayout.Label($"最新版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppTag}", m_styleNormalFont);
+            }
+            else
+            {
+                GUILayout.Label($"最新版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppBranch}-{recommend.il2cppTag}", m_styleNormalFont);
+            }
+            
 
             if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
             {
@@ -416,6 +428,7 @@ namespace Huatuo.Editor
                     {
                         huatuoType = EFILE_NAME.HUATUO,
                         huatuoTag = m_Model.GetHuatuoVersions()[m_nSelectedhuatuoVersionIndex],
+                        il2cppType = EFILE_NAME.IL2CPP,
                         il2cppTag = m_Model.GetIl2cppVersions()[m_nSelectedil2cppVersionIndex]
                     };
                     Upgrade(version);

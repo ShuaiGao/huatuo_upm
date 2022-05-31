@@ -31,13 +31,15 @@ namespace Huatuo.Editor
         private HuatuoRemoteConfig m_remoteConfig = null;
         private List<CommitItem> m_commits = null;
         private List<TagItem> m_tags = null;
+        private List<BranchItem> m_il2cpp_branchs = null;
         private EditorCoroutines.EditorCoroutine m_corFetchManifest = null;
         private EditorCoroutines.EditorCoroutine m_corFetchCommit = null;
         private EditorCoroutines.EditorCoroutine m_corFetchTag = null;
+        private EditorCoroutines.EditorCoroutine m_corBranchs = null;
 
         internal bool IsBusy()
         {
-            return m_corFetchManifest != null || m_corFetchCommit != null || m_corFetchTag != null;
+            return m_corFetchManifest != null || m_corFetchCommit != null || m_corFetchTag != null || m_corBranchs != null;
         }
 
         internal InstallVersion GetRecommendVersion(bool forceTag)
@@ -48,15 +50,16 @@ namespace Huatuo.Editor
                 return ret;
             }
 
-            ret.il2cppTag = m_remoteConfig.il2cpp_recommend_version;
+            //ret.il2cppTag = m_remoteConfig.il2cpp_recommend_version;
 
             if (forceTag)
             {
+                ret.il2cppType = EFILE_NAME.IL2CPP;
                 ret.huatuoType = EFILE_NAME.HUATUO;
                 ret.huatuoTag = m_remoteConfig.huatuo_recommend_version;
                 return ret;
             }
-
+            ret.il2cppType = EFILE_NAME.IL2CPP_BRANCH;
             ret.huatuoTag = m_remoteConfig.huatuo_recommend_version;
             if (m_commits?.Count > 0)
             {
@@ -67,6 +70,19 @@ namespace Huatuo.Editor
                     ret.huatuoType = EFILE_NAME.HUATUO_MAIN;
                 }
             }
+            var branchName = HTEditorConfig.GetIl2cppBranchName();
+            if(m_il2cpp_branchs != null)
+            {
+                foreach (var branch in m_il2cpp_branchs)
+                {
+                    if (branch.name == branchName)
+                    {
+                        ret.il2cppBranch = branchName;
+                        ret.il2cppTag = branch.commit.GetShaShort();
+                    }
+                }
+            }
+
             return ret;
         }
         internal List<string> GetHuatuoVersions()
@@ -163,6 +179,26 @@ namespace Huatuo.Editor
                     Debug.Log($"tags: {tagList}");
                     InitHuatuoTagSha();
                     m_corFetchTag = null;
+                }));
+
+            m_corBranchs = Manager.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<BranchItem>>(HTEditorConfig.urlIl2cppBranchs,
+                (itemSerial, err) =>
+                {
+                    var branchs = itemSerial.items;
+                    if (branchs == null || branchs.Count == 0)
+                    {
+                        Debug.LogError("Unable to retrieve il2cpp branchs.");
+                        err = $"【3】获取tags失败。";
+                    }
+
+                    if (!string.IsNullOrEmpty(err))
+                    {
+                        EditorUtility.DisplayDialog("错误", err, "ok");
+                    }
+
+                    this.m_il2cpp_branchs = branchs;
+                    Debug.Log($"branchs: {branchs}");
+                    m_corBranchs = null;
                 }));
         }
         private void InitHuatuoTagSha()

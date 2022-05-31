@@ -26,10 +26,21 @@ namespace Huatuo.Editor
     {
         public EFILE_NAME huatuoType;
         public EFILE_NAME il2cppType;
+        public string il2cppBranch;
         public string il2cppTag;
         public string huatuoTag;
     }
 
+    [Serializable]
+    public struct CommitItemSimple
+    {
+        public string sha;
+        public string url;
+        public string GetShaShort()
+        {
+            return sha.Substring(0, 6);
+        }
+    }
 
     [Serializable]
     public struct CommitItem
@@ -48,6 +59,13 @@ namespace Huatuo.Editor
     public struct ItemSerial<T>
     {
         public List<T> items;
+    }
+
+    [Serializable]
+    public struct BranchItem
+    {
+        public string name;
+        public CommitItemSimple commit;
     }
 
     [Serializable]

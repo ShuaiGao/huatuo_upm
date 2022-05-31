@@ -14,6 +14,7 @@ namespace Huatuo.Editor
         HUATUO,
         IL2CPP,
         HUATUO_MAIN,
+        IL2CPP_BRANCH,
     }
 
     internal class HTEditorCache
@@ -29,6 +30,7 @@ namespace Huatuo.Editor
             [typeof(RemoteConfig)] = $"{nameof(RemoteConfig)}.json",
             [typeof(ItemSerial<TagItem>)] = $"{nameof(TagItem)}.json",
             [typeof(ItemSerial<CommitItem>)] = $"{nameof(CommitItem)}.json",
+            [typeof(ItemSerial<BranchItem>)] = $"{nameof(BranchItem)}.json",
         };
 
         private static HTEditorCache instance = null;
@@ -47,6 +49,7 @@ namespace Huatuo.Editor
         }
 
         private static string CacheDirName = ".huatuo_cache";
+        //private static string CacheDirName = "cache";
         public string CacheBasePath;
 
         HTEditorCache()
@@ -95,6 +98,7 @@ namespace Huatuo.Editor
             if (path == null || path.Length == 0)
             {
                 tmp = Path.Combine(Path.GetFullPath("Library"), CacheDirName);
+                //tmp = Path.Combine(HTEditorConfig.HuatuoHelperPath, CacheDirName);
             }
             else
             {
@@ -141,30 +145,37 @@ namespace Huatuo.Editor
 
             return zipFileName;
         }
-        public static string GetHuatuoZipInnerFolder(EFILE_NAME nameType, string tag)
+        public static string GetZipInnerFolder(EFILE_NAME nameType, InstallVersion version)
         {
             switch (nameType)
             {
+                case EFILE_NAME.IL2CPP:
+                    return $"il2cpp_huatuo-{version.il2cppTag}/libil2cpp";
+                case EFILE_NAME.IL2CPP_BRANCH:
+                    return $"il2cpp_huatuo-{version.il2cppBranch}/libil2cpp";
                 case EFILE_NAME.HUATUO_MAIN:
-                    return $"/huatuo-main/huatuo";
+                    return $"huatuo-main/huatuo";
                 case EFILE_NAME.HUATUO:
-                    return $"/huatuo-{tag}/huatuo";
+                    return $"huatuo-{version.huatuoTag}/huatuo";
             }
             return "error param";
         }
-        public string GetZipPath(EFILE_NAME nameType, string tag)
+        public string GetZipPath(EFILE_NAME nameType, InstallVersion version)
         {
             var zipFileName = "";
             switch (nameType)
             {
                 case EFILE_NAME.HUATUO_MAIN:
-                    zipFileName = $"huatuo-{tag}";
+                    zipFileName = $"huatuo-{version.huatuoTag}";
                     break;
                 case EFILE_NAME.HUATUO:
-                    zipFileName = $"huatuo-{tag}";
+                    zipFileName = $"huatuo-{version.huatuoTag}";
+                    break;
+                case EFILE_NAME.IL2CPP_BRANCH:
+                    zipFileName = $"il2cpp_huatuo-{version.il2cppBranch}-{version.il2cppTag}";
                     break;
                 case EFILE_NAME.IL2CPP:
-                    zipFileName = $"il2cpp_huatuo-{tag}";
+                    zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
                     break;
                 default:
                     throw new Exception($"no support file type{nameof(nameType)}");
@@ -173,7 +184,7 @@ namespace Huatuo.Editor
             return Path.Combine(CacheBasePath, $"{zipFileName}.zip");
         }
 
-        public IEnumerator GetCache(EFILE_NAME nameType, string tag, string hashCode)
+        public IEnumerator GetCache(EFILE_NAME nameType, InstallVersion version, string hashCode)
         {
             m_counter++;
             var downloadUrl = "";
@@ -181,16 +192,20 @@ namespace Huatuo.Editor
             switch (nameType)
             {
                 case EFILE_NAME.HUATUO_MAIN:
-                    zipFileName = $"huatuo-{tag}";
+                    zipFileName = $"huatuo-{version.huatuoTag}";
                     downloadUrl = @$"{HTEditorConfig.huatuoPrefixGithub}/main.zip";
                     break;
                 case EFILE_NAME.HUATUO:
-                    zipFileName = $"huatuo-{tag}";
-                    downloadUrl = @$"{huatuoTagPrefix}/{tag}.zip";
+                    zipFileName = $"huatuo-{version.huatuoTag}";
+                    downloadUrl = @$"{huatuoTagPrefix}/{version.huatuoTag}.zip";
+                    break;
+                case EFILE_NAME.IL2CPP_BRANCH:
+                    zipFileName = $"il2cpp_huatuo-{version.il2cppBranch}-{version.il2cppTag}";
+                    downloadUrl = @$"{HTEditorConfig.libil2cppPrefixGithub}/{version.il2cppBranch}.zip";
                     break;
                 case EFILE_NAME.IL2CPP:
-                    zipFileName = $"il2cpp_huatuo-{tag}";
-                    downloadUrl = @$"{libil2cppTagPrefix}/{tag}.zip";
+                    zipFileName = $"il2cpp_huatuo-{version.il2cppTag}";
+                    downloadUrl = @$"{libil2cppTagPrefix}/{version.il2cppTag}.zip";
                     break;
                 default:
                     throw new Exception($"no support file type{nameof(nameType)}");
