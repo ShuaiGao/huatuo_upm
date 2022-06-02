@@ -48,10 +48,6 @@ namespace Huatuo.Editor
             }
         }
 
-        private static string CacheDirName = ".huatuo_cache";
-        //private static string CacheDirName = "cache";
-        public string CacheBasePath;
-
         HTEditorCache()
         {
             libil2cppTagPrefix = HTEditorConfig.libil2cppTagPrefixGithub;
@@ -68,12 +64,12 @@ namespace Huatuo.Editor
         public void SaveVersionJson<T>(T data)
         {
             var fileName = m_dictCacheName[typeof(T)];
-            File.WriteAllText(Path.Combine(CacheBasePath, fileName), JsonUtility.ToJson(data, true), Encoding.UTF8);
+            File.WriteAllText(Path.Combine(HTEditorConfig.Instance.GetCachePath(), fileName), JsonUtility.ToJson(data, true), Encoding.UTF8);
         }
         public T LoadVersionJson<T>()
         {
             var fileName = m_dictCacheName[typeof(T)];
-            var txt = File.ReadAllText(Path.Combine(CacheBasePath, fileName));
+            var txt = File.ReadAllText(Path.Combine(HTEditorConfig.Instance.GetCachePath(), fileName));
             if (string.IsNullOrEmpty(txt))
             {
                 throw new Exception("no cache data");
@@ -92,31 +88,6 @@ namespace Huatuo.Editor
             return m_nDownloadTotal == m_nSuccessCount;
         }
 
-        public void SetCacheDirectory(string path)
-        {
-            var tmp = "";
-            if (path == null || path.Length == 0)
-            {
-                tmp = Path.Combine(Path.GetFullPath("Library"), CacheDirName);
-                //tmp = Path.Combine(HTEditorConfig.HuatuoHelperPath, CacheDirName);
-            }
-            else
-            {
-                tmp = path;
-            }
-
-            try
-            {
-                Directory.CreateDirectory(tmp);
-                CacheBasePath = tmp;
-                HTEditorInstaller.Instance.SaveCacheDir();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Debug.LogError("缓存设置失败，请不要使用C盘路径做缓存");
-                Debug.LogException(ex);
-            }
-        }
 
         public string GetDownUrlWithTagHuatuo(string tag)
         {
@@ -181,7 +152,7 @@ namespace Huatuo.Editor
                     throw new Exception($"no support file type{nameof(nameType)}");
             }
 
-            return Path.Combine(CacheBasePath, $"{zipFileName}.zip");
+            return Path.Combine(HTEditorConfig.Instance.GetCachePath(), $"{zipFileName}.zip");
         }
 
         public IEnumerator GetCache(EFILE_NAME nameType, InstallVersion version, string hashCode)
@@ -212,7 +183,7 @@ namespace Huatuo.Editor
             }
 
             var downloadErr = false;
-            var zipPath = Path.Combine(CacheBasePath, $"{zipFileName}.zip");
+            var zipPath = Path.Combine(HTEditorConfig.Instance.GetCachePath(), $"{zipFileName}.zip");
             if (File.Exists(zipPath))
             {
                 // TODO 校验文件MD5

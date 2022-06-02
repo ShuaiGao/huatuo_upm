@@ -93,7 +93,6 @@ namespace Huatuo.Editor
             m_Model.Manager = this;
 
             EditorUtility.ClearProgressBar();
-            HTEditorConfig.Init();
 
             m_logo = new HTLogo();
             m_logo.Init(m_vecMinSize, this);
@@ -230,6 +229,16 @@ namespace Huatuo.Editor
 
         private IEnumerator Install(InstallVersion version)
         {
+            // 同一时间只能有一个在安装
+            FileStream objFileStream = null;
+            try
+            {
+                objFileStream = new FileStream(HTEditorConfig.Instance.HuatuoLockerFilePath, FileMode.Append, FileAccess.Write, FileShare.None);
+            }
+            catch (IOException)
+            {
+                EditorUtility.DisplayDialog("失败", "安装失败，其它程序安装中！", "ok");
+            }
             HTEditorCache.Instance.SetDownloadCount(2);
             var itor = HTEditorCache.Instance.GetCache(version.huatuoType, version, "");
             while (itor.MoveNext())
@@ -261,6 +270,7 @@ namespace Huatuo.Editor
 
             m_corUpgrade = null;
             ReloadVersion();
+            objFileStream?.Close();
         }
 
         /// <summary>
@@ -301,10 +311,10 @@ namespace Huatuo.Editor
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label($"缓存路径:", m_styleNormalFont, GUILayout.Width(65));
-                GUILayout.TextField(HTEditorCache.Instance.CacheBasePath);
+                GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath);
                 if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
                 {
-                    var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorCache.Instance.CacheBasePath, "");
+                    var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorConfig.Instance.HuatuoPath, "");
                     if (cachePath.Length == 0)
                     {
                         return;
@@ -315,11 +325,11 @@ namespace Huatuo.Editor
                         EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
                         return;
                     }
-                    HTEditorCache.Instance.SetCacheDirectory(cachePath);
+                    HTEditorConfig.Instance.SetHuatuoDirectory(cachePath);
                 }
                 if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
                 {
-                    EditorUtility.RevealInFinder(HTEditorCache.Instance.CacheBasePath);
+                    EditorUtility.RevealInFinder(HTEditorConfig.Instance.HuatuoPath);
                 }
 
                 GUILayout.EndHorizontal();
@@ -394,7 +404,7 @@ namespace Huatuo.Editor
             {
                 GUILayout.Label($"最新版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppBranch}-{recommend.il2cppTag}", m_styleNormalFont);
             }
-            
+
 
             if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
             {

@@ -30,17 +30,15 @@ namespace Huatuo.Editor
 
         public void Init()
         {
-            if (File.Exists(HTEditorConfig.HuatuoVersionPath))
+            if (File.Exists(HTEditorConfig.Instance.GetVersionPath()))
             {
-                var data = File.ReadAllText(HTEditorConfig.HuatuoVersionPath, Encoding.UTF8);
+                var data = File.ReadAllText(HTEditorConfig.Instance.GetVersionPath(), Encoding.UTF8);
                 m_HuatuoVersion = JsonUtility.FromJson<HuatuoVersion>(data);
             }
             else
             {
                 m_HuatuoVersion = default;
             }
-
-            HTEditorCache.Instance.SetCacheDirectory(m_HuatuoVersion.CacheDir);
         }
 
         public void Prepare(Action<bool> callback)
@@ -49,20 +47,19 @@ namespace Huatuo.Editor
             try
             {
                 EditorUtility.DisplayProgressBar("初始化", "初始化基础环境", 0f);
-                HTEditorConfig.Init();
 
-                if (!Directory.Exists(HTEditorConfig.HuatuoHelperPath))
+                if (!Directory.Exists(HTEditorConfig.Instance.HuatuoHelperPath))
                 {
-                    Directory.CreateDirectory(HTEditorConfig.HuatuoHelperPath);
+                    Directory.CreateDirectory(HTEditorConfig.Instance.HuatuoHelperPath);
                 }
 
-                var il2CppPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "il2cpp");
+                var il2CppPath = Path.Combine(HTEditorConfig.Instance.HuatuoHelperPath, "il2cpp");
                 if (!Directory.Exists(il2CppPath))
                 {
                     HTEditorUtility.CopyFilesRecursively(HTEditorConfig.Il2cppPath, il2CppPath);
                 }
 
-                var monoBleedingPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "MonoBleedingEdge");
+                var monoBleedingPath = Path.Combine(HTEditorConfig.Instance.HuatuoHelperPath, "MonoBleedingEdge");
                 if (!Directory.Exists(monoBleedingPath))
                 {
                     HTEditorUtility.CopyFilesRecursively(HTEditorConfig.MonoBleedingEdgePath, monoBleedingPath);
@@ -82,7 +79,7 @@ namespace Huatuo.Editor
 
         public void CheckHuatuo(Action<string> callback)
         {
-            var il2CppPath = Path.Combine(HTEditorConfig.HuatuoHelperPath, "il2cpp");
+            var il2CppPath = Path.Combine(HTEditorConfig.Instance.HuatuoHelperPath, "il2cpp");
             if (!Directory.Exists(il2CppPath))
             {
                 callback?.Invoke($"[CheckHuatuo] {il2CppPath} not exists!");
@@ -109,18 +106,19 @@ namespace Huatuo.Editor
         public void DoUninstall()
         {
             // backup libil2cpp
-            if (Directory.Exists(HTEditorConfig.Libil2cppOritinalPath))
+            if (Directory.Exists(HTEditorConfig.Instance.GetUnityIl2cppPath()))
             {
-                if (Directory.Exists(HTEditorConfig.Libil2cppPath))
-                {
-                    Directory.Delete(HTEditorConfig.Libil2cppPath, true);
-                }
-
-                Directory.Move(HTEditorConfig.Libil2cppOritinalPath, HTEditorConfig.Libil2cppPath);
+                Directory.Delete(HTEditorConfig.Instance.GetUnityIl2cppPath(), true);
             }
-
+            if (Directory.Exists(HTEditorConfig.Instance.GetVersionPath()))
+            {
+                Directory.Delete(HTEditorConfig.Instance.GetVersionPath(), true);
+            }
+            
             m_InstallVersion.huatuoTag = "";
             m_InstallVersion.il2cppTag = "";
+            m_HuatuoVersion.HuatuoTag = "";
+            m_HuatuoVersion.Il2cppTag = "";
             SaveVersionLog();
             // 不存在原始备份目录
             // TODO 这里考虑下是否帮用户下载libil2cpp
@@ -253,13 +251,13 @@ namespace Huatuo.Editor
 
             try
             {
-                if (Directory.Exists(HTEditorConfig.Libil2cppPath))
+                if (Directory.Exists(HTEditorConfig.Instance.GetUnityLibil2cppPath()))
                 {
-                    Directory.Delete(HTEditorConfig.Libil2cppPath, true);
+                    Directory.Delete(HTEditorConfig.Instance.GetUnityLibil2cppPath(), true);
                 }
                 
-                HTEditorUtility.CopyFilesRecursively(il2cppDirName, HTEditorConfig.HuatuoIL2CPPPath);
-                HTEditorUtility.CopyFilesRecursively(huatuoDirName, HTEditorConfig.HuatuoPath);
+                HTEditorUtility.CopyFilesRecursively(il2cppDirName, HTEditorConfig.Instance.GetUnityLibil2cppPath());
+                HTEditorUtility.CopyFilesRecursively(huatuoDirName, HTEditorConfig.Instance.GetUnityHuatuoPath());
             }
             catch (IOException ex)
             {
@@ -326,12 +324,11 @@ namespace Huatuo.Editor
                 return;
             }
 
-            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
             // backup libil2cpp
-            if (Directory.Exists(installPathBak))
+            if (Directory.Exists(m_sBackupFileName))
             {
-                Directory.Delete(HTEditorConfig.Libil2cppPath, true);
-                Directory.Move(installPathBak, HTEditorConfig.Libil2cppPath);
+                Directory.Delete(HTEditorConfig.Instance.GetUnityLibil2cppPath(), true);
+                Directory.Move(m_sBackupFileName, HTEditorConfig.Instance.GetUnityLibil2cppPath());
             }
         }
 
@@ -342,61 +339,70 @@ namespace Huatuo.Editor
                 return;
             }
 
-            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
             // backup libil2cpp
-            if (Directory.Exists(installPathBak))
+            if (Directory.Exists(m_sBackupFileName))
             {
-                Directory.Delete(installPathBak, true);
+                Directory.Delete(m_sBackupFileName, true);
             }
         }
 
         public void BackupLibil2cpp()
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            m_sBackupFileName = $"libil2cpp_{ts.TotalSeconds}";
-            string installPathBak = Path.Combine(HTEditorConfig.Il2cppPath, m_sBackupFileName);
-            string original = Path.Combine(HTEditorConfig.Il2cppPath, "libil2cpp_original_unity");
+            m_sBackupFileName = $"{HTEditorConfig.Instance.GetUnityLibil2cppPath()}_bak_{ts.TotalSeconds}";
+            //string original = Path.Combine(HTEditorConfig.Il2cppPath, "libil2cpp_original_unity");
 
-            if (!Directory.Exists(HTEditorConfig.Libil2cppPath))
+            if (!Directory.Exists(HTEditorConfig.Instance.GetUnityLibil2cppPath()))
             {
                 return;
             }
 
             // backup libil2cpp original
-            if (!Directory.Exists(original))
-            {
-                Directory.Move(HTEditorConfig.Libil2cppPath, original);
-            }
+            //if (!Directory.Exists(original))
+            //{
+            //    Directory.Move(HTEditorConfig.Libil2cppPath, original);
+            //}
 
-            if (Directory.Exists(HTEditorConfig.Libil2cppPath))
+            if (Directory.Exists(HTEditorConfig.Instance.GetUnityLibil2cppPath()))
             {
                 m_bDoBackup = true;
-                Directory.Move(HTEditorConfig.Libil2cppPath, installPathBak);
+                Directory.Move(HTEditorConfig.Instance.GetUnityLibil2cppPath(), m_sBackupFileName);
             }
+        }
+
+        private HuatuoVersion loadVersions()
+        {
+            HuatuoVersion versionData;
+            try
+            {
+                var data = File.ReadAllText(HTEditorConfig.Instance.GetVersionPath(), Encoding.UTF8);
+                versionData = JsonUtility.FromJson<HuatuoVersion>(data);
+            }catch (Exception)
+            {
+                versionData = default;
+            }
+            return versionData;
         }
 
         public void SaveVersionLog()
         {
+            var v = loadVersions();
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
 
             // TODO 记录libil2cpp 和 huatuo 版本信息
-            m_HuatuoVersion.HuatuoTag = m_InstallVersion.huatuoTag;
-            m_HuatuoVersion.Il2cppTag = m_InstallVersion.il2cppTag;
-            //m_HuatuoVersion.Il2cppUrl = HTEditorCache.Instance.GetDownUrlWithTagIl2cpp(m_InstallVersion.il2cppTag);
-            //m_HuatuoVersion.HuatuoUrl = HTEditorCache.Instance.GetDownUrlWithTagHuatuo(m_InstallVersion.huatuoTag);
-            m_HuatuoVersion.InstallTime = DateTime.Now.ToString();
-            m_HuatuoVersion.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
-            Debug.Log($"Save huatuo install version, path: {HTEditorConfig.HuatuoVersionPath}");
-            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(m_HuatuoVersion, true),
-                Encoding.UTF8);
+            v.HuatuoTag = m_InstallVersion.huatuoTag;
+            v.Il2cppTag = m_InstallVersion.il2cppTag;
+            v.InstallTime = DateTime.Now.ToString();
+            v.Timestamp = Convert.ToInt64(ts.TotalMilliseconds);
+            Debug.Log($"Save huatuo install version, path: {HTEditorConfig.Instance.GetVersionPath()}， data={JsonUtility.ToJson(v, true)}");
+            File.WriteAllText(HTEditorConfig.Instance.GetVersionPath(), JsonUtility.ToJson(v, true), Encoding.UTF8);
         }
 
         public void SaveCacheDir()
         {
-            m_HuatuoVersion.CacheDir = HTEditorCache.Instance.CacheBasePath;
-            File.WriteAllText(HTEditorConfig.HuatuoVersionPath, JsonUtility.ToJson(m_HuatuoVersion, true),
-                Encoding.UTF8);
+            var tmp = new HuatuoVersionDict();
+            tmp.UnityIl2cppDir = HTEditorConfig.Instance.HuatuoPath;
+            File.WriteAllText(HTEditorConfig.Instance.HuatuoCacheData, EditorJsonUtility.ToJson(tmp, true),Encoding.UTF8);
         }
-        
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditorInternal;
-
+using UnityEngine;
 
 namespace Huatuo.Editor
 {
@@ -10,12 +10,16 @@ namespace Huatuo.Editor
     {
         public string HuatuoTag;
         public string Il2cppTag;
-        public string Il2cppUrl;
-        public string HuatuoUrl;
         public string InstallTime;
         public long Timestamp;
-        public string CacheDir;
     }
+
+    internal struct HuatuoVersionDict
+    {
+        public string UnityIl2cppDir;
+    }
+
+
     internal struct MultiHuatuoVersion
     {
         public Dictionary<string, HuatuoVersion> data;

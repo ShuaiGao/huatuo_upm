@@ -26,7 +26,7 @@ namespace Huatuo.Editor.BuildPipeline
                 {
                     if (string.IsNullOrEmpty(_settings.HuatuoHelperPath))
                     {
-                        _settings.HuatuoHelperPath = HTEditorConfig.HuatuoHelperPath;
+                        _settings.HuatuoHelperPath = HTEditorConfig.Instance.HuatuoHelperPath;
                         AssetDatabase.SaveAssets();
                     }
 
@@ -38,7 +38,7 @@ namespace Huatuo.Editor.BuildPipeline
                 {
                     if (string.IsNullOrEmpty(_settings.HuatuoHelperPath))
                     {
-                        _settings.HuatuoHelperPath = HTEditorConfig.HuatuoHelperPath;
+                        _settings.HuatuoHelperPath = HTEditorConfig.Instance.HuatuoHelperPath;
                         AssetDatabase.SaveAssets();
                     }
 
@@ -47,7 +47,7 @@ namespace Huatuo.Editor.BuildPipeline
 
                 HTEditorUtility.EnsureFilePath(DefaultAssetPath);
                 _settings = CreateInstance<HtBuildSettings>();
-                _settings.HuatuoHelperPath = HTEditorConfig.HuatuoHelperPath;
+                _settings.HuatuoHelperPath = HTEditorConfig.Instance.HuatuoHelperPath;
                 AssetDatabase.CreateAsset(_settings, DefaultAssetPath);
                 AssetDatabase.SaveAssets();
 
