@@ -7,6 +7,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Networking;
 using Huatuo.Editor.ThirdPart;
+using Huatuo.Editor.BuildPipeline;
 
 namespace Huatuo.Editor
 {
@@ -23,6 +24,7 @@ namespace Huatuo.Editor
         internal bool m_bVersionUnsported = false;
         private bool m_bUnsportedC = false;
         private bool m_bShowOtherVersion = false;
+        private bool m_bEnableHuatuo= false;
 
         private GUIStyle m_styleNormalFont = null;
         private GUIStyle m_styleWarningFont = null;
@@ -280,6 +282,16 @@ namespace Huatuo.Editor
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label($"<color=white>Unity3D:\t{HTEditorConfig.UnityFullVersion}</color>", m_styleNormalFont);
+
+
+            var bEnableHuatuo = HtBuildSettings.Instance.Enable;
+            m_bEnableHuatuo = EditorGUILayout.ToggleLeft("是否启用Huatuo", bEnableHuatuo);
+            if (bEnableHuatuo != m_bEnableHuatuo)
+            {
+                m_bEnableHuatuo = bEnableHuatuo;
+                HtBuildSettings.ReverseEnable();
+            }
+            
             GUILayout.EndHorizontal();
 
             if (m_bVersionUnsported)
@@ -310,11 +322,11 @@ namespace Huatuo.Editor
             else
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"缓存路径:", m_styleNormalFont, GUILayout.Width(65));
+                GUILayout.Label($"Huatuo路径:", m_styleNormalFont, GUILayout.Width(85));
                 GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath);
                 if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
                 {
-                    var cachePath = EditorUtility.OpenFolderPanel("请选择缓存路径", HTEditorConfig.Instance.HuatuoPath, "");
+                    var cachePath = EditorUtility.OpenFolderPanel("请选择Huatuo路径", HTEditorConfig.Instance.HuatuoPath, "");
                     if (cachePath.Length == 0)
                     {
                         return;
@@ -331,7 +343,6 @@ namespace Huatuo.Editor
                 {
                     EditorUtility.RevealInFinder(HTEditorConfig.Instance.HuatuoPath);
                 }
-
                 GUILayout.EndHorizontal();
             }
 
@@ -417,6 +428,7 @@ namespace Huatuo.Editor
             }
 
             GUILayout.EndHorizontal();
+
 
             if (m_bShowOtherVersion)
             {

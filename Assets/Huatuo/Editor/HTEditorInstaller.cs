@@ -251,6 +251,12 @@ namespace Huatuo.Editor
 
             try
             {
+                if (!Directory.Exists(HTEditorConfig.Instance.GetUnityIl2cppPath()))
+                {
+                    HTEditorUtility.CopyFilesRecursively(Path.Combine(EditorApplication.applicationContentsPath, "il2cpp"), HTEditorConfig.Instance.GetUnityIl2cppPath());
+                    Directory.Delete(HTEditorConfig.Instance.GetUnityLibil2cppPath(), true);
+                }
+
                 if (Directory.Exists(HTEditorConfig.Instance.GetUnityLibil2cppPath()))
                 {
                     Directory.Delete(HTEditorConfig.Instance.GetUnityLibil2cppPath(), true);
@@ -258,6 +264,10 @@ namespace Huatuo.Editor
                 
                 HTEditorUtility.CopyFilesRecursively(il2cppDirName, HTEditorConfig.Instance.GetUnityLibil2cppPath());
                 HTEditorUtility.CopyFilesRecursively(huatuoDirName, HTEditorConfig.Instance.GetUnityHuatuoPath());
+                if (!Directory.Exists(Path.Combine(HTEditorConfig.Instance.GetUnityDigitsPath(), "MonoBleedingEdge")))
+                {
+                    HTEditorUtility.CopyFilesRecursively(Path.Combine(EditorApplication.applicationContentsPath, "MonoBleedingEdge"), Path.Combine(HTEditorConfig.Instance.GetUnityDigitsPath(), "MonoBleedingEdge"));
+                }
             }
             catch (IOException ex)
             {

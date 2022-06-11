@@ -34,7 +34,6 @@ namespace Huatuo.Editor.BuildPipeline
             {
                 return;
             }
-
             BuildFinished(false, !condition.Contains("OperationCanceledException"));
         }
 

@@ -34,7 +34,7 @@ namespace Huatuo.Editor
         public static readonly string Changelog = WebSiteBase;
         public static readonly string SupportedVersion = WebSiteBase + "/wiki/support_versions";
 
-        private static readonly string EditorBasePath = EditorApplication.applicationContentsPath;
+        public static readonly string EditorBasePath = EditorApplication.applicationContentsPath;
         public static readonly string HuatuoIL2CPPPath = EditorBasePath + "/il2cpp/libil2cpp";
         public static readonly string HuatuoIL2CPPBackPath = EditorBasePath + "/il2cpp/libil2cpp_huatuo";
         public static readonly string Il2cppPath = Path.Combine(EditorBasePath, "il2cpp");
@@ -88,6 +88,10 @@ namespace Huatuo.Editor
         public string GetCachePath()
         {
             return Path.Combine(instance.HuatuoPath, HTEditorConfig.CacheDirName);
+        }
+        public string GetUnityDigitsPath()
+        {
+            return Path.Combine(instance.HuatuoPath, UnityVersionDigits);
         }
         public string GetUnityIl2cppPath()
         {

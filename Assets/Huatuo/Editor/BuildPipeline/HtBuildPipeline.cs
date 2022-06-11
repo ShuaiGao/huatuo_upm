@@ -18,12 +18,12 @@ namespace Huatuo.Editor.BuildPipeline
     /// <summary>
     /// 这个类是Huatuo的BuildPipeline，用于在导出项目的时候对Huatuo进行相关的资源支持
     /// </summary>
-    public class HtBuildPipeline/* : IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
+    public class HtBuildPipeline: IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
         IPostBuildPlayerScriptDLLs, IIl2CppProcessor, IUnityLinkerProcessor,
 #if UNITY_ANDROID
         IPostGenerateGradleAndroidProject,
 #endif
-        IPostprocessBuildWithReport*/
+        IPostprocessBuildWithReport
     {
         public int callbackOrder => 1;
 
@@ -52,6 +52,7 @@ namespace Huatuo.Editor.BuildPipeline
                 var msg = $"[HtBuildPipeline]BuildFinished:{(successful ? "Successful" : "Failed")}";
 
                 Environment.SetEnvironmentVariable("UNITY_IL2CPP_PATH", "");
+
                 if (successful)
                 {
                     Debug.Log(msg);
@@ -66,9 +67,9 @@ namespace Huatuo.Editor.BuildPipeline
                     return;
                 }
 
-                EditorUtility.DisplayDialog("错误", "有异常发生，请根据控制台提示修正对应错误!", "确定");
-                _sBuildReportAddMessage.Invoke(report,
-                    new object[] {LogType.Exception, "用户取消", "BuildFailedException"});
+                //EditorUtility.DisplayDialog("错误", "有异常发生，请根据控制台提示修正对应错误!", "确定");
+                //_sBuildReportAddMessage.Invoke(report,
+                //    new object[] {LogType.Exception, "用户取消", "BuildFailedException"});
             });
 
             //准备il2cpp环境
@@ -98,23 +99,23 @@ namespace Huatuo.Editor.BuildPipeline
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            //      Debug.Log($"[HtBuildPipeline]OnProcessScene");
+                  Debug.Log($"[HtBuildPipeline]OnProcessScene");
         }
 
         public string[] OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
         {
-            //       Debug.Log($"[HtBuildPipeline]OnFilterAssemblies");
+                   Debug.Log($"[HtBuildPipeline]OnFilterAssemblies");
             return assemblies;
         }
 
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            //        Debug.Log($"[HtBuildPipeline]OnPostBuildPlayerScriptDLLs");
+            Debug.Log($"[HtBuildPipeline]OnPostBuildPlayerScriptDLLs");
         }
 
         public string GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)
         {
-            //        Debug.Log($"[HtBuildPipeline]GenerateAdditionalLinkXmlFile");
+                    Debug.Log($"[HtBuildPipeline]GenerateAdditionalLinkXmlFile");
             return string.Empty;
         }
 
@@ -129,8 +130,8 @@ namespace Huatuo.Editor.BuildPipeline
             }
 
             //如果启用了huatuo，需要对环境变量进行配置
-            var newIl2cppPath = Path.Combine(HtBuildSettings.Instance.HuatuoHelperPath, "il2cpp/");
-            newIl2cppPath = Path.GetFullPath(newIl2cppPath).Replace('\\', '/');
+            var newIl2cppPath = HTEditorConfig.Instance.GetUnityIl2cppPath();
+            //newIl2cppPath = Path.GetFullPath(newIl2cppPath).Replace('\\', '/');
             if (!Directory.Exists(newIl2cppPath))
             {
                 throw new FileNotFoundException("Huatuo相关支持文件未找到，请打开Huatuo Manager进行检查。");
@@ -141,26 +142,25 @@ namespace Huatuo.Editor.BuildPipeline
 
         public void OnAfterRun(BuildReport report, UnityLinkerBuildPipelineData data)
         {
-            //           Debug.Log($"[HtBuildPipeline]OnAfterRun");
+            Debug.Log($"[HtBuildPipeline]OnAfterRun");
         }
 
         public void OnBeforeConvertRun(BuildReport report, Il2CppBuildPipelineData data)
         {
-            //           Debug.Log($"[HtBuildPipeline]OnBeforeConvertRun");
+                       Debug.Log($"[HtBuildPipeline]OnBeforeConvertRun");
         }
 
 #if UNITY_ANDROID
         public void OnPostGenerateGradleAndroidProject(string path)
         {
- //           Debug.Log($"[HtBuildPipeline]OnPostGenerateGradleAndroidProject");
+            Debug.Log($"[HtBuildPipeline]OnPostGenerateGradleAndroidProject");
         }
 #endif
 
         public void OnPostprocessBuild(BuildReport report)
         {
-            Debug.Log($"[HtBuildPipeline]OnPostprocessBuild");
-
             HtBuildException.Destroy();
+            
         }
     }
 }
