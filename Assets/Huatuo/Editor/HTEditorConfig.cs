@@ -57,12 +57,16 @@ namespace Huatuo.Editor
             switch (UnityVersionDigits)
             {
                 case "2020.3.33":
+                case "2020.3.35":
                     return "2020.3.33";
                 case "2020.3.7":
                 case "2020.3.9":
                     return "2020.3.7";
                 case "2021.3.0":
                 case "2021.3.1":
+                case "2021.3.2":
+                case "2021.3.3":
+                case "2021.3.4":
                     return "2021.3.1";
             }
             return "";
