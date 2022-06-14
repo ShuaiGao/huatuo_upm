@@ -323,7 +323,7 @@ namespace Huatuo.Editor
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label($"Huatuo路径:", m_styleNormalFont, GUILayout.Width(85));
-                GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath);
+                GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath, GUILayout.MaxWidth(380));
                 if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
                 {
                     var cachePath = EditorUtility.OpenFolderPanel("请选择Huatuo路径", HTEditorConfig.Instance.HuatuoPath, "");
@@ -392,7 +392,7 @@ namespace Huatuo.Editor
             else
             {
                 GUILayout.Label("未安装", m_styleNormalFont);
-                if (GUILayout.Button("检查更新", m_styleNormalBtn, GUILayout.Width(150)))
+                if (GUILayout.Button("检查更新", m_styleNormalBtn, GUILayout.Width(143)))
                 {
                     CheckUpdate();
                 }

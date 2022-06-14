@@ -18,7 +18,7 @@ namespace Huatuo.Editor.BuildPipeline
     /// <summary>
     /// 这个类是Huatuo的BuildPipeline，用于在导出项目的时候对Huatuo进行相关的资源支持
     /// </summary>
-    public class HtBuildPipeline: IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
+    public class HtBuildPipeline : IPreprocessBuildWithReport, IProcessSceneWithReport, IFilterBuildAssemblies,
         IPostBuildPlayerScriptDLLs, IIl2CppProcessor, IUnityLinkerProcessor,
 #if UNITY_ANDROID
         IPostGenerateGradleAndroidProject,
@@ -92,37 +92,36 @@ namespace Huatuo.Editor.BuildPipeline
                 }
                 else
                 {
-           //         throw new Exception($"Huatuo环境准备失败，请打开Huatuo Manager进行检查。\n{ret}");
+                    //throw new Exception($"Huatuo环境准备失败，请打开Huatuo Manager进行检查。\n{ret}");
                 }
             });
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-                  Debug.Log($"[HtBuildPipeline]OnProcessScene");
+            //Debug.Log($"[HtBuildPipeline]OnProcessScene");
         }
 
         public string[] OnFilterAssemblies(BuildOptions buildOptions, string[] assemblies)
         {
-                   Debug.Log($"[HtBuildPipeline]OnFilterAssemblies");
+            //Debug.Log($"[HtBuildPipeline]OnFilterAssemblies");
             return assemblies;
         }
 
         public void OnPostBuildPlayerScriptDLLs(BuildReport report)
         {
-            Debug.Log($"[HtBuildPipeline]OnPostBuildPlayerScriptDLLs");
+            //Debug.Log($"[HtBuildPipeline]OnPostBuildPlayerScriptDLLs");
         }
 
         public string GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)
         {
-                    Debug.Log($"[HtBuildPipeline]GenerateAdditionalLinkXmlFile");
+            //Debug.Log($"[HtBuildPipeline]GenerateAdditionalLinkXmlFile");
             return string.Empty;
         }
 
         public void OnBeforeRun(BuildReport report, UnityLinkerBuildPipelineData data)
         {
             Debug.Log($"[HtBuildPipeline]OnBeforeRun");
-
             if (!HtBuildSettings.Instance.Enable)
             {
                 Debug.Log($"[HtBuildPipeline]Huatuo has been disabled!");
@@ -130,24 +129,23 @@ namespace Huatuo.Editor.BuildPipeline
             }
 
             //如果启用了huatuo，需要对环境变量进行配置
-            var newIl2cppPath = HTEditorConfig.Instance.GetUnityIl2cppPath();
-            //newIl2cppPath = Path.GetFullPath(newIl2cppPath).Replace('\\', '/');
-            if (!Directory.Exists(newIl2cppPath))
+            var huatuoPath = HTEditorConfig.Instance.GetUnityHuatuoPath();
+            if (!Directory.Exists(huatuoPath))
             {
-                throw new FileNotFoundException("Huatuo相关支持文件未找到，请打开Huatuo Manager进行检查。");
+                throw new FileNotFoundException("Huatuo相关源文件未找到，请打开Huatuo->Manager进行安装");
             }
 
-            Environment.SetEnvironmentVariable("UNITY_IL2CPP_PATH", newIl2cppPath);
+            Environment.SetEnvironmentVariable("UNITY_IL2CPP_PATH", HTEditorConfig.Instance.GetUnityIl2cppPath());
         }
 
         public void OnAfterRun(BuildReport report, UnityLinkerBuildPipelineData data)
         {
-            Debug.Log($"[HtBuildPipeline]OnAfterRun");
+            //Debug.Log($"[HtBuildPipeline]OnAfterRun");
         }
 
         public void OnBeforeConvertRun(BuildReport report, Il2CppBuildPipelineData data)
         {
-                       Debug.Log($"[HtBuildPipeline]OnBeforeConvertRun");
+            //Debug.Log($"[HtBuildPipeline]OnBeforeConvertRun");
         }
 
 #if UNITY_ANDROID
@@ -160,7 +158,7 @@ namespace Huatuo.Editor.BuildPipeline
         public void OnPostprocessBuild(BuildReport report)
         {
             HtBuildException.Destroy();
-            
+
         }
     }
 }

@@ -105,7 +105,6 @@ namespace Huatuo.Editor
 
         public void DoUninstall()
         {
-            // backup libil2cpp
             if (Directory.Exists(HTEditorConfig.Instance.GetUnityIl2cppPath()))
             {
                 Directory.Delete(HTEditorConfig.Instance.GetUnityIl2cppPath(), true);
@@ -113,6 +112,10 @@ namespace Huatuo.Editor
             if (Directory.Exists(HTEditorConfig.Instance.GetVersionPath()))
             {
                 Directory.Delete(HTEditorConfig.Instance.GetVersionPath(), true);
+            }
+            if(Directory.Exists(Path.Combine(HTEditorConfig.Instance.GetUnityDigitsPath(), "MonoBleedingEdge")))
+            {
+                Directory.Delete(Path.Combine(HTEditorConfig.Instance.GetUnityDigitsPath(), "MonoBleedingEdge"), true);
             }
             
             m_InstallVersion.huatuoTag = "";
@@ -190,6 +193,16 @@ namespace Huatuo.Editor
 
         private bool m_bDoBackup;
         private string m_sBackupFileName;
+
+        public void DeleteCache()
+        {
+            // 移除当前项目缓存目录，但其它unity项目缓存无法清理
+            var cachePath = Path.Combine(Path.GetFullPath("Library"), "Il2cppBuildCache");
+            if (Directory.Exists(cachePath))
+            {
+                Directory.Delete(cachePath, true);
+            }
+        }
 
         private IEnumerator Extract(Action<bool> callback)
         {
@@ -321,6 +334,8 @@ namespace Huatuo.Editor
             {
                 yield return null;
             }
+
+            this.DeleteCache();
 
             callback?.Invoke(true);
         }

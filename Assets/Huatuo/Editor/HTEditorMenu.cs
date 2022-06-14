@@ -30,6 +30,7 @@ namespace Huatuo.Editor
         public static void EnableHuatuo()
         {
             HtBuildSettings.ReverseEnable();
+            HTEditorInstaller.Instance.DeleteCache();
         }
 
         [MenuItem("HuaTuo/卸载 0.1.x huatuo安装版本", false, 5)]
@@ -51,7 +52,7 @@ namespace Huatuo.Editor
             }
             else
             {
-                EditorUtility.DisplayDialog("提示", "未找到使用huatuo tookit安装的旧版本", "ok");
+                EditorUtility.DisplayDialog("提示", "未找到使用huatuo tookit安装的备份文件", "ok");
                 return;
             }
 
