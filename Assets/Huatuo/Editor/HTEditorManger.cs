@@ -22,7 +22,6 @@ namespace Huatuo.Editor
         private bool m_bInitialized = false;
         private bool m_bHasIl2cpp = false;
         internal bool m_bVersionUnsported = false;
-        private bool m_bUnsportedC = false;
         private bool m_bShowOtherVersion = false;
         private bool m_bEnableHuatuo= false;
 
@@ -99,10 +98,6 @@ namespace Huatuo.Editor
             m_logo = new HTLogo();
             m_logo.Init(m_vecMinSize, this);
 
-            if (HTEditorConfig.Il2cppPath.StartsWith("c:") || HTEditorConfig.Il2cppPath.StartsWith("C:"))
-            {
-                m_bUnsportedC = true;
-            }
             ReloadVersion();
             CheckUpdate();
 
@@ -313,38 +308,29 @@ namespace Huatuo.Editor
                 return;
             }
 
-            if (m_bUnsportedC)
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Huatuo路径:", m_styleNormalFont, GUILayout.Width(85));
+            GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath, GUILayout.MaxWidth(380));
+            if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"<color=red>你的Unity安装在C盘版本，当前工具无法处理安装卸载!</color>", m_styleWarningFont);
-                GUILayout.EndHorizontal();
-            }
-            else
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"Huatuo路径:", m_styleNormalFont, GUILayout.Width(85));
-                GUILayout.TextField(HTEditorConfig.Instance.HuatuoPath, GUILayout.MaxWidth(380));
-                if (GUILayout.Button("修改", m_styleNormalBtn, GUILayout.Width(70)))
+                var cachePath = EditorUtility.OpenFolderPanel("请选择Huatuo路径", HTEditorConfig.Instance.HuatuoPath, "");
+                if (cachePath.Length == 0)
                 {
-                    var cachePath = EditorUtility.OpenFolderPanel("请选择Huatuo路径", HTEditorConfig.Instance.HuatuoPath, "");
-                    if (cachePath.Length == 0)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    if (!Directory.Exists(cachePath))
-                    {
-                        EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
-                        return;
-                    }
-                    HTEditorConfig.Instance.SetHuatuoDirectory(cachePath);
-                }
-                if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
+                if (!Directory.Exists(cachePath))
                 {
-                    EditorUtility.RevealInFinder(HTEditorConfig.Instance.HuatuoPath);
+                    EditorUtility.DisplayDialog("错误", "路径不存在!", "ok");
+                    return;
                 }
-                GUILayout.EndHorizontal();
+                HTEditorConfig.Instance.SetHuatuoDirectory(cachePath);
             }
+            if (GUILayout.Button("打开", m_styleNormalBtn, GUILayout.Width(70)))
+            {
+                EditorUtility.RevealInFinder(HTEditorConfig.Instance.HuatuoPath);
+            }
+            GUILayout.EndHorizontal();
 
             var recommend = m_Model.GetRecommendVersion(false);
             var strMsg = "";
