@@ -140,6 +140,10 @@ namespace Huatuo.Editor
             HuatuoPath = Path.Combine(HTEditorUtility.GetAppDataPath(), HuatuoCachDirName);
             HuatuoCacheData = Path.Combine(HuatuoPath, "cache.json");
 
+            if (!Directory.Exists(HuatuoPath))
+            {
+                Directory.CreateDirectory(HuatuoPath);
+            }
             try
             {
                 var data = File.ReadAllText(HuatuoCacheData, Encoding.UTF8);
