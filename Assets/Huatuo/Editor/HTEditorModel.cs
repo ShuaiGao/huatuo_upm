@@ -45,10 +45,10 @@ namespace Huatuo.Editor
         internal InstallVersion GetRecommendVersion(bool forceTag)
         {
             var ret = new InstallVersion();
-            if (m_remoteConfig == null)
-            {
-                return ret;
-            }
+            //if (m_remoteConfig == null)
+            //{
+            //    return ret;
+            //}
 
             //ret.il2cppTag = m_remoteConfig.il2cpp_recommend_version;
 
@@ -56,14 +56,14 @@ namespace Huatuo.Editor
             {
                 ret.il2cppType = EFILE_NAME.IL2CPP;
                 ret.huatuoType = EFILE_NAME.HUATUO;
-                ret.huatuoTag = m_remoteConfig.huatuo_recommend_version;
+                ret.huatuoTag = m_remoteConfig?.huatuo_recommend_version;
                 return ret;
             }
             ret.il2cppType = EFILE_NAME.IL2CPP_BRANCH;
-            ret.huatuoTag = m_remoteConfig.huatuo_recommend_version;
+            ret.huatuoTag = m_remoteConfig?.huatuo_recommend_version;
             if (m_commits?.Count > 0)
             {
-                if (m_commits[0].sha != m_remoteConfig.huatuo_recommend_version_sha)
+                if (m_commits[0].sha != m_remoteConfig?.huatuo_recommend_version_sha)
                 {
                     // TODO 当推荐版本显示为sha，但是拉取代码却使用的head，故安装过程中有代码更新会导致看到的和更新到的不一致
                     ret.huatuoTag = $"{HTEditorConfig.HEAD}[{m_commits[0].sha.Substring(0, 6)}]";
@@ -106,38 +106,44 @@ namespace Huatuo.Editor
         }
         internal void fetchData()
         {
-            if (m_corFetchManifest != null)
+            //if (m_corFetchManifest != null)
+            //{
+            //    Manager.StopCoroutine(m_corFetchManifest.routine);
+            //    m_corFetchManifest = null;
+            //}
+
+            //m_corFetchManifest = Manager.StartCoroutine(HTEditorUtility.HttpRequest<RemoteConfig>(
+            //    HTEditorConfig.urlVersionConfig, (config, err) =>
+            //    {
+            //        if (string.IsNullOrEmpty(config.huatuo_recommend_version))
+            //        {
+            //            Debug.LogError("Unable to retrieve remote config.");
+            //            err = $"【3】获取远程版本信息错误 1。";
+            //        }
+
+            //        if (!config.Equals(default(RemoteConfig)))
+            //        {
+            //            m_remoteConfig = new HuatuoRemoteConfig(config);
+            //            if (!m_remoteConfig.unity_version.Contains(HTEditorConfig.UnityVersionDigits))
+            //            {
+            //                Manager.m_bVersionUnsported = true;
+            //            }
+            //        }
+
+            //        if (!string.IsNullOrEmpty(err))
+            //        {
+            //            EditorUtility.DisplayDialog("错误", err, "ok");
+            //        }
+
+            //        InitHuatuoTagSha();
+            //        m_corFetchManifest = null;
+            //    }));
+
+            if (m_corFetchCommit != null)
             {
                 Manager.StopCoroutine(m_corFetchManifest.routine);
-                m_corFetchManifest = null;
+                m_corFetchCommit = null;
             }
-
-            m_corFetchManifest = Manager.StartCoroutine(HTEditorUtility.HttpRequest<RemoteConfig>(
-                HTEditorConfig.urlVersionConfig, (config, err) =>
-                {
-                    if (string.IsNullOrEmpty(config.huatuo_recommend_version))
-                    {
-                        Debug.LogError("Unable to retrieve remote config.");
-                        err = $"【3】获取远程版本信息错误 1。";
-                    }
-
-                    if (!config.Equals(default(RemoteConfig)))
-                    {
-                        m_remoteConfig = new HuatuoRemoteConfig(config);
-                        if (!m_remoteConfig.unity_version.Contains(HTEditorConfig.UnityVersionDigits))
-                        {
-                            Manager.m_bVersionUnsported = true;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(err))
-                    {
-                        EditorUtility.DisplayDialog("错误", err, "ok");
-                    }
-
-                    InitHuatuoTagSha();
-                    m_corFetchManifest = null;
-                }));
 
             m_corFetchCommit = Manager.StartCoroutine(HTEditorUtility.HttpRequest<ItemSerial<CommitItem>>(HTEditorConfig.urlHuatuoCommits,
                 (itemSerial, err) =>
@@ -164,7 +170,7 @@ namespace Huatuo.Editor
                 (itemSerial, err) =>
                 {
                     var tagList = itemSerial.items;
-                    if (tagList == null || tagList.Count == 0)
+                    if (tagList == null)
                     {
                         Debug.LogError("Unable to retrieve tags.");
                         err = $"【3】获取tags失败。";

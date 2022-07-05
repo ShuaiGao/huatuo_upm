@@ -12,28 +12,28 @@ namespace Huatuo.Editor
 {
     internal class HTEditorMenu
     {
-        [MenuItem("HuaTuo/Manager...", false, 3)]
+        [MenuItem("Huatuo/Manager...", false, 3)]
         public static void ShowManager()
         {
             var win = HTEditorManger.GetWindow<HTEditorManger>(true);
             win.titleContent = new GUIContent("Huatuo Manager");
             win.ShowUtility();
         }
-        [MenuItem("HuaTuo/Manager...", true)]
+        [MenuItem("Huatuo/Manager...", true)]
         public static bool CheckHuatuo()
         {
             Menu.SetChecked("HuaTuo/Enable Huatuo", HtBuildSettings.Instance.Enable);
             return true;
         }
 
-        [MenuItem("HuaTuo/Enable Huatuo", false, 5)]
+        [MenuItem("Huatuo/Enable Huatuo", false, 5)]
         public static void EnableHuatuo()
         {
             HtBuildSettings.ReverseEnable();
             HTEditorInstaller.Instance.DeleteCache();
         }
 
-        [MenuItem("HuaTuo/卸载 0.1.x huatuo安装版本", false, 5)]
+        [MenuItem("Huatuo/卸载 0.1.x huatuo安装版本", false, 5)]
         public static void RemoveOldHuatuo()
         {
             var huatuoOldVersion = Path.Combine(Path.GetDirectoryName(EditorApplication.applicationPath), ".huatuo");

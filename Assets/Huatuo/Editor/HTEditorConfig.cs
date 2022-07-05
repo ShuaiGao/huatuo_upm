@@ -144,7 +144,7 @@ namespace Huatuo.Editor
             {
                 var data = File.ReadAllText(HuatuoCacheData, Encoding.UTF8);
                 var d = JsonUtility.FromJson<HuatuoVersionDict>(data);
-                if (string.IsNullOrEmpty(d.UnityIl2cppDir))
+                if (!string.IsNullOrEmpty(d.UnityIl2cppDir))
                 {
                     HuatuoPath = d.UnityIl2cppDir;
                 }

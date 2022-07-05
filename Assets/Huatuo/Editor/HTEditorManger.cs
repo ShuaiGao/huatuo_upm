@@ -106,7 +106,7 @@ namespace Huatuo.Editor
 
         private void OnDestroy()
         {
-            m_logo.Destroy();
+            m_logo?.Destroy();
             this.StopAllCoroutines();
         }
 
@@ -402,16 +402,15 @@ namespace Huatuo.Editor
                 GUILayout.Label($"最新版本:\tHuatuo: {recommend.huatuoTag}\tIL2CPP: {recommend.il2cppBranch}-{recommend.il2cppTag}", m_styleNormalFont);
             }
 
-
             if (GUILayout.Button(string.IsNullOrEmpty(strMsg) ? "安装" : "更新", m_styleNormalBtn, GUILayout.Width(70)))
             {
                 Upgrade(m_Model.GetRecommendVersion(false));
             }
 
-            if (GUILayout.Button("其它版本", m_styleNormalBtn, GUILayout.Width(70)))
-            {
-                m_bShowOtherVersion = !m_bShowOtherVersion;
-            }
+            //if (GUILayout.Button("其它版本", m_styleNormalBtn, GUILayout.Width(70)))
+            //{
+            //    m_bShowOtherVersion = !m_bShowOtherVersion;
+            //}
 
             GUILayout.EndHorizontal();
 
